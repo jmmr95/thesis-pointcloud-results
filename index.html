@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anexos — IA Generativa para la Reconstrucción 3D</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0d1b2a;
+    color: #e0e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+
+  .hero {
+    text-align: center;
+    max-width: 720px;
+    margin-bottom: 56px;
+  }
+  .hero .label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4a90d9;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #ffffff;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    font-size: 14px;
+    color: #7a93aa;
+    line-height: 1.7;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 760px;
+  }
+
+  .card {
+    background: #142030;
+    border: 1px solid #1e3248;
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: #2d5a8a;
+    background: #162840;
+  }
+
+  .card .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card .icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .card.completion .icon { background: #1a3a5c; }
+  .card.completion .icon svg { color: #4a90d9; }
+  .card.denoising  .icon { background: #1a3d2a; }
+  .card.denoising  .icon svg { color: #3dba7a; }
+  .card.upsampling .icon { background: #3a1a3a; }
+  .card.upsampling .icon svg { color: #c46ad4; }
+
+  .card .tag {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .card.completion .tag { color: #4a90d9; }
+  .card.denoising  .tag { color: #3dba7a; }
+  .card.upsampling .tag { color: #c46ad4; }
+
+  .card h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #e8f0f8;
+    line-height: 1.3;
+  }
+
+  .card .models {
+    font-size: 12px;
+    color: #5a7a90;
+    line-height: 1.6;
+  }
+
+  .card .models span {
+    display: inline-block;
+    background: #0d1b2a;
+    border: 1px solid #1e3248;
+    border-radius: 5px;
+    padding: 2px 8px;
+    margin: 2px 2px 2px 0;
+    font-size: 11px;
+    color: #7a93aa;
+  }
+
+  .card .arrow {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #2d5a8a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card:hover .arrow { color: #4a90d9; }
+
+  footer {
+    margin-top: 56px;
+    font-size: 11px;
+    color: #2d4a5a;
+    text-align: center;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="label">Anexos — Resultados Visuales</p>
+  <h1>IA Generativa para la Reconstrucción 3D en Gemelos Digitales de Agricultura de Precisión</h1>
+  <p>Comparativa visual de modelos evaluados sobre nubes de puntos 3D de plantas.<br>
+     Selecciona una tarea para explorar los resultados.</p>
+</div>
+
+<div class="cards">
+
+  <a class="card completion" href="resultados_completion/index.html">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 7.5v9L12 21l9-4.5v-9"/>
+      </svg>
+    </div>
+    <span class="tag">Completion</span>
+    <h2>Completado de nubes</h2>
+    <div class="models">
+      <span>GRNet</span><span>SnowFlake</span><span>treePointr</span>
+    </div>
+    <div class="arrow">Ver resultados →</div>
+  </a>
+
+  <a class="card denoising" href="resultados_denoising/index.html">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8l4 4-4 4"/>
+      </svg>
+    </div>
+    <span class="tag">Denoising</span>
+    <h2>Eliminación de ruido</h2>
+    <div class="models">
+      <span>IterativePFN</span><span>PathNet</span><span>StraightPCF</span>
+    </div>
+    <div class="arrow">Ver resultados →</div>
+  </a>
+
+  <a class="card upsampling" href="resultados_upsampling/index.html">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20V4M5 11l7-7 7 7"/><path d="M5 17h14"/>
+      </svg>
+    </div>
+    <span class="tag">Upsampling</span>
+    <h2>Aumento de densidad</h2>
+    <div class="models">
+      <span>GradPU</span><span>APU-LDI</span>
+    </div>
+    <div class="arrow">Ver resultados →</div>
+  </a>
+
+</div>
+
+<footer>
+  Vista 3D · Coloreado por altura (eje Z) — gradiente viridis<br>
+  Generado automáticamente · Tesis de posgrado
+</footer>
+
+</body>
+</html>

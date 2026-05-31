@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparativa de modelos de completion</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #eef1f8;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Barra lateral de navegación ── */
+  nav {
+    width: 210px;
+    min-width: 210px;
+    background: #1a2a3a;
+    color: #ccd;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    font-size: 12px;
+  }
+  nav h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #778899;
+    padding: 0 16px 10px;
+    border-bottom: 1px solid #2c3e50;
+    margin-bottom: 10px;
+  }
+  nav ul { list-style: none; }
+  nav li a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 16px;
+    color: #aabbcc;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  nav li a:hover {
+    background: #243444;
+    color: #fff;
+    border-left-color: #4a90d9;
+  }
+  .badge {
+    background: #2c3e50;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    color: #778;
+  }
+
+  /* ── Contenido principal ── */
+  main {
+    flex: 1;
+    padding: 28px 24px;
+    overflow-x: auto;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a2a3a;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #778;
+    margin-bottom: 20px;
+  }
+
+  /* ── Separadores de grupo ── */
+  .group-header td {
+    background: #dce4f0;
+    font-weight: 700;
+    font-size: 12px;
+    color: #1a2a3a;
+    padding: 8px 14px;
+    letter-spacing: 0.04em;
+    border-top: 2px solid #b0bcd0;
+  }
+
+  /* ── Tabla ── */
+  .table-wrap {
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    background: #fff;
+    overflow: hidden;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+  }
+  th, td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e8eaf0;
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    text-align: center;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .muestra-hdr {
+    text-align: left;
+    background: #2c3e50;
+    color: #fff;
+    min-width: 220px;
+  }
+  .muestra-cel {
+    background: #f8f9fc;
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    color: #334;
+    vertical-align: middle;
+    min-width: 220px;
+    border-right: 2px solid #dde2ef;
+    word-break: break-all;
+    max-width: 240px;
+  }
+  .img-cel {
+    text-align: center;
+    padding: 10px 8px;
+  }
+  .img-cel img {
+    max-width: 300px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #dde2ef;
+    display: block;
+    margin: 0 auto;
+    loading: lazy;
+  }
+  .ausente {
+    color: #aaa;
+    font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 12px;
+  }
+  tr:hover td { background: #f4f6ff !important; }
+  tr:hover td.muestra-cel { background: #eaeffa !important; }
+  
+        .mhdr-0 { background:#1a3a5c; color:#fff; }
+        .mcel-0 { border-top: 3px solid #1a3a5c; background:#e8f0fa; }
+        
+        .mhdr-1 { background:#1a4a36; color:#fff; }
+        .mcel-1 { border-top: 3px solid #1a4a36; background:#e8f5ee; }
+        
+        .mhdr-2 { background:#4a1a3a; color:#fff; }
+        .mcel-2 { border-top: 3px solid #4a1a3a; background:#f5e8f0; }
+        
+</style>
+</head>
+<body>
+
+<nav>
+  <h2>Grupos</h2>
+  <ul><li><a href="#Arabidopsis">Arabidopsis <span class="badge">16</span></a></li><li><a href="#benthi">benthi <span class="badge">11</span></a></li><li><a href="#m82D">m82D <span class="badge">32</span></a></li></ul>
+</nav>
+
+<main>
+<h1>Comparativa de modelos de completion</h1>
+<p class="subtitle">
+  Vista: <b>3D</b> &nbsp;·&nbsp;
+  Coloreado por altura (eje Z) — gradiente viridis &nbsp;·&nbsp;
+  59 muestras &nbsp;·&nbsp; 3 modelos
+</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr>
+    <th class="muestra-hdr">Muestra</th>
+    <th class="mhdr-0">GRNet</th>
+    <th class="mhdr-1">SnowFlake</th>
+    <th class="mhdr-2">treePointr</th>
+  </tr>
+</thead>
+<tbody>
+  <tr class="group-header" id="Arabidopsis"><td colspan="4">Arabidopsis</td></tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_A3_D33</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_col0_Control_A3_D33.png" alt="GRNet — Arabidopsis_col0_Control_A3_D33" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_col0_Control_A3_D33.png" alt="SnowFlake — Arabidopsis_col0_Control_A3_D33" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_col0_Control_A3_D33.png" alt="treePointr — Arabidopsis_col0_Control_A3_D33" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_C_D35</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_col0_Control_C_D35.png" alt="GRNet — Arabidopsis_col0_Control_C_D35" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_col0_Control_C_D35.png" alt="SnowFlake — Arabidopsis_col0_Control_C_D35" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_col0_Control_C_D35.png" alt="treePointr — Arabidopsis_col0_Control_C_D35" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_D_D35</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_col0_Control_D_D35.png" alt="GRNet — Arabidopsis_col0_Control_D_D35" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_col0_Control_D_D35.png" alt="SnowFlake — Arabidopsis_col0_Control_D_D35" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_col0_Control_D_D35.png" alt="treePointr — Arabidopsis_col0_Control_D_D35" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_G_D39</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_col0_Control_G_D39.png" alt="GRNet — Arabidopsis_col0_Control_G_D39" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_col0_Control_G_D39.png" alt="SnowFlake — Arabidopsis_col0_Control_G_D39" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_col0_Control_G_D39.png" alt="treePointr — Arabidopsis_col0_Control_G_D39" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_A2_D35</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_cry1-2_Control_A2_D35.png" alt="GRNet — Arabidopsis_cry1-2_Control_A2_D35" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_cry1-2_Control_A2_D35.png" alt="SnowFlake — Arabidopsis_cry1-2_Control_A2_D35" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_cry1-2_Control_A2_D35.png" alt="treePointr — Arabidopsis_cry1-2_Control_A2_D35" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_A_D30</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_cry1-2_Control_A_D30.png" alt="GRNet — Arabidopsis_cry1-2_Control_A_D30" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_cry1-2_Control_A_D30.png" alt="SnowFlake — Arabidopsis_cry1-2_Control_A_D30" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_cry1-2_Control_A_D30.png" alt="treePointr — Arabidopsis_cry1-2_Control_A_D30" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_A_D31</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_cry1-2_Control_A_D31.png" alt="GRNet — Arabidopsis_cry1-2_Control_A_D31" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_cry1-2_Control_A_D31.png" alt="SnowFlake — Arabidopsis_cry1-2_Control_A_D31" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_cry1-2_Control_A_D31.png" alt="treePointr — Arabidopsis_cry1-2_Control_A_D31" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_C3_D39</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_cry1-2_Control_C3_D39.png" alt="GRNet — Arabidopsis_cry1-2_Control_C3_D39" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_cry1-2_Control_C3_D39.png" alt="SnowFlake — Arabidopsis_cry1-2_Control_C3_D39" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_cry1-2_Control_C3_D39.png" alt="treePointr — Arabidopsis_cry1-2_Control_C3_D39" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_F_D35</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_cry1-2_Control_F_D35.png" alt="GRNet — Arabidopsis_cry1-2_Control_F_D35" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_cry1-2_Control_F_D35.png" alt="SnowFlake — Arabidopsis_cry1-2_Control_F_D35" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_cry1-2_Control_F_D35.png" alt="treePointr — Arabidopsis_cry1-2_Control_F_D35" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_G_D36</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_cry1-2_Control_G_D36.png" alt="GRNet — Arabidopsis_cry1-2_Control_G_D36" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_cry1-2_Control_G_D36.png" alt="SnowFlake — Arabidopsis_cry1-2_Control_G_D36" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_cry1-2_Control_G_D36.png" alt="treePointr — Arabidopsis_cry1-2_Control_G_D36" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_d14_Control_A2_D36</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_d14_Control_A2_D36.png" alt="GRNet — Arabidopsis_d14_Control_A2_D36" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_d14_Control_A2_D36.png" alt="SnowFlake — Arabidopsis_d14_Control_A2_D36" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_d14_Control_A2_D36.png" alt="treePointr — Arabidopsis_d14_Control_A2_D36" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_d14pin3pin4pin7_Control_C2_D44</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_d14pin3pin4pin7_Control_C2_D44.png" alt="GRNet — Arabidopsis_d14pin3pin4pin7_Control_C2_D44" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_d14pin3pin4pin7_Control_C2_D44.png" alt="SnowFlake — Arabidopsis_d14pin3pin4pin7_Control_C2_D44" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_d14pin3pin4pin7_Control_C2_D44.png" alt="treePointr — Arabidopsis_d14pin3pin4pin7_Control_C2_D44" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_max4-5_Control_A2_D33</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_max4-5_Control_A2_D33.png" alt="GRNet — Arabidopsis_max4-5_Control_A2_D33" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_max4-5_Control_A2_D33.png" alt="SnowFlake — Arabidopsis_max4-5_Control_A2_D33" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_max4-5_Control_A2_D33.png" alt="treePointr — Arabidopsis_max4-5_Control_A2_D33" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_max4-5_Control_A_D27</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_max4-5_Control_A_D27.png" alt="GRNet — Arabidopsis_max4-5_Control_A_D27" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_max4-5_Control_A_D27.png" alt="SnowFlake — Arabidopsis_max4-5_Control_A_D27" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_max4-5_Control_A_D27.png" alt="treePointr — Arabidopsis_max4-5_Control_A_D27" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_max4-5_Control_D_D27</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_max4-5_Control_D_D27.png" alt="GRNet — Arabidopsis_max4-5_Control_D_D27" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_max4-5_Control_D_D27.png" alt="SnowFlake — Arabidopsis_max4-5_Control_D_D27" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_max4-5_Control_D_D27.png" alt="treePointr — Arabidopsis_max4-5_Control_D_D27" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_phyA2-11_Control_B_D36</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/Arabidopsis_phyA2-11_Control_B_D36.png" alt="GRNet — Arabidopsis_phyA2-11_Control_B_D36" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/Arabidopsis_phyA2-11_Control_B_D36.png" alt="SnowFlake — Arabidopsis_phyA2-11_Control_B_D36" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/Arabidopsis_phyA2-11_Control_B_D36.png" alt="treePointr — Arabidopsis_phyA2-11_Control_B_D36" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="benthi"><td colspan="4">benthi</td></tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_A_D18</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_control_A_D18.png" alt="GRNet — benthi_control_A_D18" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_control_A_D18.png" alt="SnowFlake — benthi_control_A_D18" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_control_A_D18.png" alt="treePointr — benthi_control_A_D18" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_A_D30</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_control_A_D30.png" alt="GRNet — benthi_control_A_D30" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_control_A_D30.png" alt="SnowFlake — benthi_control_A_D30" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_control_A_D30.png" alt="treePointr — benthi_control_A_D30" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_C_D16</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_control_C_D16.png" alt="GRNet — benthi_control_C_D16" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_control_C_D16.png" alt="SnowFlake — benthi_control_C_D16" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_control_C_D16.png" alt="treePointr — benthi_control_C_D16" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_C_D22</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_control_C_D22.png" alt="GRNet — benthi_control_C_D22" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_control_C_D22.png" alt="SnowFlake — benthi_control_C_D22" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_control_C_D22.png" alt="treePointr — benthi_control_C_D22" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_heat_B_D00</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_heat_B_D00.png" alt="GRNet — benthi_heat_B_D00" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_heat_B_D00.png" alt="SnowFlake — benthi_heat_B_D00" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_heat_B_D00.png" alt="treePointr — benthi_heat_B_D00" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_heat_B_D04</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_heat_B_D04.png" alt="GRNet — benthi_heat_B_D04" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_heat_B_D04.png" alt="SnowFlake — benthi_heat_B_D04" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_heat_B_D04.png" alt="treePointr — benthi_heat_B_D04" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_A_D02</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_shade_A_D02.png" alt="GRNet — benthi_shade_A_D02" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_shade_A_D02.png" alt="SnowFlake — benthi_shade_A_D02" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_shade_A_D02.png" alt="treePointr — benthi_shade_A_D02" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_A_D22</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_shade_A_D22.png" alt="GRNet — benthi_shade_A_D22" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_shade_A_D22.png" alt="SnowFlake — benthi_shade_A_D22" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_shade_A_D22.png" alt="treePointr — benthi_shade_A_D22" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_B_D02</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_shade_B_D02.png" alt="GRNet — benthi_shade_B_D02" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_shade_B_D02.png" alt="SnowFlake — benthi_shade_B_D02" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_shade_B_D02.png" alt="treePointr — benthi_shade_B_D02" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_B_D08</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_shade_B_D08.png" alt="GRNet — benthi_shade_B_D08" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_shade_B_D08.png" alt="SnowFlake — benthi_shade_B_D08" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_shade_B_D08.png" alt="treePointr — benthi_shade_B_D08" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_B_D14</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/benthi_shade_B_D14.png" alt="GRNet — benthi_shade_B_D14" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/benthi_shade_B_D14.png" alt="SnowFlake — benthi_shade_B_D14" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/benthi_shade_B_D14.png" alt="treePointr — benthi_shade_B_D14" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="m82D"><td colspan="4">m82D</td></tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_A_D05</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_A_D05.png" alt="GRNet — m82D_control1_A_D05" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_A_D05.png" alt="SnowFlake — m82D_control1_A_D05" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_A_D05.png" alt="treePointr — m82D_control1_A_D05" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_A_D13</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_A_D13.png" alt="GRNet — m82D_control1_A_D13" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_A_D13.png" alt="SnowFlake — m82D_control1_A_D13" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_A_D13.png" alt="treePointr — m82D_control1_A_D13" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_A_D16</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_A_D16.png" alt="GRNet — m82D_control1_A_D16" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_A_D16.png" alt="SnowFlake — m82D_control1_A_D16" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_A_D16.png" alt="treePointr — m82D_control1_A_D16" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D03</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_B_D03.png" alt="GRNet — m82D_control1_B_D03" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_B_D03.png" alt="SnowFlake — m82D_control1_B_D03" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_B_D03.png" alt="treePointr — m82D_control1_B_D03" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D13</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_B_D13.png" alt="GRNet — m82D_control1_B_D13" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_B_D13.png" alt="SnowFlake — m82D_control1_B_D13" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_B_D13.png" alt="treePointr — m82D_control1_B_D13" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D16</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_B_D16.png" alt="GRNet — m82D_control1_B_D16" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_B_D16.png" alt="SnowFlake — m82D_control1_B_D16" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_B_D16.png" alt="treePointr — m82D_control1_B_D16" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D18</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control1_B_D18.png" alt="GRNet — m82D_control1_B_D18" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control1_B_D18.png" alt="SnowFlake — m82D_control1_B_D18" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control1_B_D18.png" alt="treePointr — m82D_control1_B_D18" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_A_D18</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control2_A_D18.png" alt="GRNet — m82D_control2_A_D18" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control2_A_D18.png" alt="SnowFlake — m82D_control2_A_D18" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control2_A_D18.png" alt="treePointr — m82D_control2_A_D18" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_A_D20</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control2_A_D20.png" alt="GRNet — m82D_control2_A_D20" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control2_A_D20.png" alt="SnowFlake — m82D_control2_A_D20" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control2_A_D20.png" alt="treePointr — m82D_control2_A_D20" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D02</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control2_C_D02.png" alt="GRNet — m82D_control2_C_D02" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control2_C_D02.png" alt="SnowFlake — m82D_control2_C_D02" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control2_C_D02.png" alt="treePointr — m82D_control2_C_D02" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D08</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control2_C_D08.png" alt="GRNet — m82D_control2_C_D08" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control2_C_D08.png" alt="SnowFlake — m82D_control2_C_D08" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control2_C_D08.png" alt="treePointr — m82D_control2_C_D08" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D12</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control2_C_D12.png" alt="GRNet — m82D_control2_C_D12" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control2_C_D12.png" alt="SnowFlake — m82D_control2_C_D12" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control2_C_D12.png" alt="treePointr — m82D_control2_C_D12" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D14</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_control2_C_D14.png" alt="GRNet — m82D_control2_C_D14" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_control2_C_D14.png" alt="SnowFlake — m82D_control2_C_D14" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_control2_C_D14.png" alt="treePointr — m82D_control2_C_D14" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_A_D26</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_A_D26.png" alt="GRNet — m82D_drought_A_D26" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_A_D26.png" alt="SnowFlake — m82D_drought_A_D26" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_A_D26.png" alt="treePointr — m82D_drought_A_D26" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_A_D30</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_A_D30.png" alt="GRNet — m82D_drought_A_D30" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_A_D30.png" alt="SnowFlake — m82D_drought_A_D30" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_A_D30.png" alt="treePointr — m82D_drought_A_D30" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D04</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_B_D04.png" alt="GRNet — m82D_drought_B_D04" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_B_D04.png" alt="SnowFlake — m82D_drought_B_D04" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_B_D04.png" alt="treePointr — m82D_drought_B_D04" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D06</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_B_D06.png" alt="GRNet — m82D_drought_B_D06" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_B_D06.png" alt="SnowFlake — m82D_drought_B_D06" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_B_D06.png" alt="treePointr — m82D_drought_B_D06" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D14</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_B_D14.png" alt="GRNet — m82D_drought_B_D14" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_B_D14.png" alt="SnowFlake — m82D_drought_B_D14" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_B_D14.png" alt="treePointr — m82D_drought_B_D14" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D16</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_B_D16.png" alt="GRNet — m82D_drought_B_D16" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_B_D16.png" alt="SnowFlake — m82D_drought_B_D16" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_B_D16.png" alt="treePointr — m82D_drought_B_D16" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_C_D08</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_drought_C_D08.png" alt="GRNet — m82D_drought_C_D08" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_drought_C_D08.png" alt="SnowFlake — m82D_drought_C_D08" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_drought_C_D08.png" alt="treePointr — m82D_drought_C_D08" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_B_D08</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_heat_B_D08.png" alt="GRNet — m82D_heat_B_D08" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_heat_B_D08.png" alt="SnowFlake — m82D_heat_B_D08" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_heat_B_D08.png" alt="treePointr — m82D_heat_B_D08" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_B_D15</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_heat_B_D15.png" alt="GRNet — m82D_heat_B_D15" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_heat_B_D15.png" alt="SnowFlake — m82D_heat_B_D15" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_heat_B_D15.png" alt="treePointr — m82D_heat_B_D15" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_C_D00</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_heat_C_D00.png" alt="GRNet — m82D_heat_C_D00" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_heat_C_D00.png" alt="SnowFlake — m82D_heat_C_D00" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_heat_C_D00.png" alt="treePointr — m82D_heat_C_D00" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_C_D03</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_heat_C_D03.png" alt="GRNet — m82D_heat_C_D03" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_heat_C_D03.png" alt="SnowFlake — m82D_heat_C_D03" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_heat_C_D03.png" alt="treePointr — m82D_heat_C_D03" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_A_D10</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_highlight_A_D10.png" alt="GRNet — m82D_highlight_A_D10" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_highlight_A_D10.png" alt="SnowFlake — m82D_highlight_A_D10" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_highlight_A_D10.png" alt="treePointr — m82D_highlight_A_D10" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_A_D16</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_highlight_A_D16.png" alt="GRNet — m82D_highlight_A_D16" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_highlight_A_D16.png" alt="SnowFlake — m82D_highlight_A_D16" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_highlight_A_D16.png" alt="treePointr — m82D_highlight_A_D16" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_B_D10</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_highlight_B_D10.png" alt="GRNet — m82D_highlight_B_D10" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_highlight_B_D10.png" alt="SnowFlake — m82D_highlight_B_D10" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_highlight_B_D10.png" alt="treePointr — m82D_highlight_B_D10" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_C_D00</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_highlight_C_D00.png" alt="GRNet — m82D_highlight_C_D00" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_highlight_C_D00.png" alt="SnowFlake — m82D_highlight_C_D00" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_highlight_C_D00.png" alt="treePointr — m82D_highlight_C_D00" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_A_D24</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_shade_A_D24.png" alt="GRNet — m82D_shade_A_D24" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_shade_A_D24.png" alt="SnowFlake — m82D_shade_A_D24" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_shade_A_D24.png" alt="treePointr — m82D_shade_A_D24" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_B_D13</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_shade_B_D13.png" alt="GRNet — m82D_shade_B_D13" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_shade_B_D13.png" alt="SnowFlake — m82D_shade_B_D13" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_shade_B_D13.png" alt="treePointr — m82D_shade_B_D13" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_C_D18</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_shade_C_D18.png" alt="GRNet — m82D_shade_C_D18" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_shade_C_D18.png" alt="SnowFlake — m82D_shade_C_D18" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_shade_C_D18.png" alt="treePointr — m82D_shade_C_D18" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_C_D21</td>
+    <td class="img-cel mcel-0"><img src="imagenes/GRNet/m82D_shade_C_D21.png" alt="GRNet — m82D_shade_C_D21" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/SnowFlake/m82D_shade_C_D21.png" alt="SnowFlake — m82D_shade_C_D21" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/treePointr/m82D_shade_C_D21.png" alt="treePointr — m82D_shade_C_D21" loading="lazy"></td>
+  </tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>

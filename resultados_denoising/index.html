@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparativa de modelos de denoising</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #eef1f8;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Barra lateral de navegación ── */
+  nav {
+    width: 210px;
+    min-width: 210px;
+    background: #1a2a3a;
+    color: #ccd;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    font-size: 12px;
+  }
+  nav h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #778899;
+    padding: 0 16px 10px;
+    border-bottom: 1px solid #2c3e50;
+    margin-bottom: 10px;
+  }
+  nav ul { list-style: none; }
+  nav li a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 16px;
+    color: #aabbcc;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  nav li a:hover {
+    background: #243444;
+    color: #fff;
+    border-left-color: #4a90d9;
+  }
+  .badge {
+    background: #2c3e50;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    color: #778;
+  }
+
+  /* ── Contenido principal ── */
+  main {
+    flex: 1;
+    padding: 28px 24px;
+    overflow-x: auto;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a2a3a;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #778;
+    margin-bottom: 20px;
+  }
+
+  /* ── Separadores de grupo ── */
+  .group-header td {
+    background: #dce4f0;
+    font-weight: 700;
+    font-size: 12px;
+    color: #1a2a3a;
+    padding: 8px 14px;
+    letter-spacing: 0.04em;
+    border-top: 2px solid #b0bcd0;
+  }
+
+  /* ── Tabla ── */
+  .table-wrap {
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    background: #fff;
+    overflow: hidden;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+  }
+  th, td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e8eaf0;
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    text-align: center;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .muestra-hdr {
+    text-align: left;
+    background: #2c3e50;
+    color: #fff;
+    min-width: 220px;
+  }
+  .muestra-cel {
+    background: #f8f9fc;
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    color: #334;
+    vertical-align: middle;
+    min-width: 220px;
+    border-right: 2px solid #dde2ef;
+    word-break: break-all;
+    max-width: 240px;
+  }
+  .img-cel {
+    text-align: center;
+    padding: 10px 8px;
+  }
+  .img-cel img {
+    max-width: 300px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #dde2ef;
+    display: block;
+    margin: 0 auto;
+    loading: lazy;
+  }
+  .ausente {
+    color: #aaa;
+    font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 12px;
+  }
+  tr:hover td { background: #f4f6ff !important; }
+  tr:hover td.muestra-cel { background: #eaeffa !important; }
+  
+        .mhdr-0 { background:#1a3a5c; color:#fff; }
+        .mcel-0 { border-top: 3px solid #1a3a5c; background:#e8f0fa; }
+        
+        .mhdr-1 { background:#1a4a36; color:#fff; }
+        .mcel-1 { border-top: 3px solid #1a4a36; background:#e8f5ee; }
+        
+        .mhdr-2 { background:#4a1a3a; color:#fff; }
+        .mcel-2 { border-top: 3px solid #4a1a3a; background:#f5e8f0; }
+        
+</style>
+</head>
+<body>
+
+<nav>
+  <h2>Grupos</h2>
+  <ul><li><a href="#Arabidopsis">Arabidopsis <span class="badge">16</span></a></li><li><a href="#LD1281-4-2-3">LD1281-4-2-3 <span class="badge">1</span></a></li><li><a href="#LD1281-5-2-1">LD1281-5-2-1 <span class="badge">1</span></a></li><li><a href="#LD1281-7-4-2">LD1281-7-4-2 <span class="badge">1</span></a></li><li><a href="#LD145-5-3-1">LD145-5-3-1 <span class="badge">1</span></a></li><li><a href="#LD502-9-6-3">LD502-9-6-3 <span class="badge">1</span></a></li><li><a href="#LD586-6-3-2">LD586-6-3-2 <span class="badge">1</span></a></li><li><a href="#LD586-6-4-2">LD586-6-4-2 <span class="badge">1</span></a></li><li><a href="#LD586-7-4-1">LD586-7-4-1 <span class="badge">1</span></a></li><li><a href="#LD586-9-4-1">LD586-9-4-1 <span class="badge">1</span></a></li><li><a href="#XY335-3-1-13">XY335-3-1-13 <span class="badge">1</span></a></li><li><a href="#XY335-3-1-3">XY335-3-1-3 <span class="badge">1</span></a></li><li><a href="#XY335-4-2-11">XY335-4-2-11 <span class="badge">1</span></a></li><li><a href="#XY335-5-3-17">XY335-5-3-17 <span class="badge">1</span></a></li><li><a href="#XY335-5-3-3">XY335-5-3-3 <span class="badge">1</span></a></li><li><a href="#XY335-5-3-47">XY335-5-3-47 <span class="badge">1</span></a></li><li><a href="#XY335-5-3-59">XY335-5-3-59 <span class="badge">1</span></a></li><li><a href="#XY335-6-3-21">XY335-6-3-21 <span class="badge">1</span></a></li><li><a href="#XY335-6-3-41">XY335-6-3-41 <span class="badge">1</span></a></li><li><a href="#XY335-6-4-25">XY335-6-4-25 <span class="badge">1</span></a></li><li><a href="#XY335-6-4-34">XY335-6-4-34 <span class="badge">1</span></a></li><li><a href="#XY335-6-4-39">XY335-6-4-39 <span class="badge">1</span></a></li><li><a href="#XY335-7-3-4">XY335-7-3-4 <span class="badge">1</span></a></li><li><a href="#XY335-7-3-6">XY335-7-3-6 <span class="badge">1</span></a></li><li><a href="#XY335-7-4-10">XY335-7-4-10 <span class="badge">1</span></a></li><li><a href="#XY335-7-4-17">XY335-7-4-17 <span class="badge">1</span></a></li><li><a href="#XY335-7-5-6">XY335-7-5-6 <span class="badge">1</span></a></li><li><a href="#XY335-8-3-1">XY335-8-3-1 <span class="badge">1</span></a></li><li><a href="#XY335-8-3-3">XY335-8-3-3 <span class="badge">1</span></a></li><li><a href="#XY335-8-5-11">XY335-8-5-11 <span class="badge">1</span></a></li><li><a href="#XY335-8-5-5">XY335-8-5-5 <span class="badge">1</span></a></li><li><a href="#XY335-9-6-5">XY335-9-6-5 <span class="badge">1</span></a></li><li><a href="#benthi">benthi <span class="badge">11</span></a></li><li><a href="#m82D">m82D <span class="badge">32</span></a></li><li><a href="#sorghum">sorghum <span class="badge">15</span></a></li></ul>
+</nav>
+
+<main>
+<h1>Comparativa de modelos de denoising</h1>
+<p class="subtitle">
+  Vista: <b>3D</b> &nbsp;·&nbsp;
+  Coloreado por altura (eje Z) — gradiente viridis &nbsp;·&nbsp;
+  105 muestras &nbsp;·&nbsp; 3 modelos
+</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+  <tr>
+    <th class="muestra-hdr">Muestra</th>
+    <th class="mhdr-0">IterativePFN</th>
+    <th class="mhdr-1">PathNet</th>
+    <th class="mhdr-2">StraightPCF</th>
+  </tr>
+</thead>
+<tbody>
+  <tr class="group-header" id="Arabidopsis"><td colspan="4">Arabidopsis</td></tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_A3_D33_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_col0_Control_A3_D33_completa.png" alt="IterativePFN — Arabidopsis_col0_Control_A3_D33_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_col0_Control_A3_D33_completa.png" alt="PathNet — Arabidopsis_col0_Control_A3_D33_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_col0_Control_A3_D33_completa.png" alt="StraightPCF — Arabidopsis_col0_Control_A3_D33_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_C_D35_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_col0_Control_C_D35_completa.png" alt="IterativePFN — Arabidopsis_col0_Control_C_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_col0_Control_C_D35_completa.png" alt="PathNet — Arabidopsis_col0_Control_C_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_col0_Control_C_D35_completa.png" alt="StraightPCF — Arabidopsis_col0_Control_C_D35_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_D_D35_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_col0_Control_D_D35_completa.png" alt="IterativePFN — Arabidopsis_col0_Control_D_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_col0_Control_D_D35_completa.png" alt="PathNet — Arabidopsis_col0_Control_D_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_col0_Control_D_D35_completa.png" alt="StraightPCF — Arabidopsis_col0_Control_D_D35_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_col0_Control_G_D39_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_col0_Control_G_D39_completa.png" alt="IterativePFN — Arabidopsis_col0_Control_G_D39_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_col0_Control_G_D39_completa.png" alt="PathNet — Arabidopsis_col0_Control_G_D39_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_col0_Control_G_D39_completa.png" alt="StraightPCF — Arabidopsis_col0_Control_G_D39_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_A2_D35_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_cry1-2_Control_A2_D35_completa.png" alt="IterativePFN — Arabidopsis_cry1-2_Control_A2_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_cry1-2_Control_A2_D35_completa.png" alt="PathNet — Arabidopsis_cry1-2_Control_A2_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_cry1-2_Control_A2_D35_completa.png" alt="StraightPCF — Arabidopsis_cry1-2_Control_A2_D35_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_A_D30_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_cry1-2_Control_A_D30_completa.png" alt="IterativePFN — Arabidopsis_cry1-2_Control_A_D30_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_cry1-2_Control_A_D30_completa.png" alt="PathNet — Arabidopsis_cry1-2_Control_A_D30_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_cry1-2_Control_A_D30_completa.png" alt="StraightPCF — Arabidopsis_cry1-2_Control_A_D30_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_A_D31_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_cry1-2_Control_A_D31_completa.png" alt="IterativePFN — Arabidopsis_cry1-2_Control_A_D31_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_cry1-2_Control_A_D31_completa.png" alt="PathNet — Arabidopsis_cry1-2_Control_A_D31_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_cry1-2_Control_A_D31_completa.png" alt="StraightPCF — Arabidopsis_cry1-2_Control_A_D31_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_C3_D39_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_cry1-2_Control_C3_D39_completa.png" alt="IterativePFN — Arabidopsis_cry1-2_Control_C3_D39_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_cry1-2_Control_C3_D39_completa.png" alt="PathNet — Arabidopsis_cry1-2_Control_C3_D39_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_cry1-2_Control_C3_D39_completa.png" alt="StraightPCF — Arabidopsis_cry1-2_Control_C3_D39_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_F_D35_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_cry1-2_Control_F_D35_completa.png" alt="IterativePFN — Arabidopsis_cry1-2_Control_F_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_cry1-2_Control_F_D35_completa.png" alt="PathNet — Arabidopsis_cry1-2_Control_F_D35_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_cry1-2_Control_F_D35_completa.png" alt="StraightPCF — Arabidopsis_cry1-2_Control_F_D35_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_cry1-2_Control_G_D36_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_cry1-2_Control_G_D36_completa.png" alt="IterativePFN — Arabidopsis_cry1-2_Control_G_D36_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_cry1-2_Control_G_D36_completa.png" alt="PathNet — Arabidopsis_cry1-2_Control_G_D36_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_cry1-2_Control_G_D36_completa.png" alt="StraightPCF — Arabidopsis_cry1-2_Control_G_D36_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_d14_Control_A2_D36_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_d14_Control_A2_D36_completa.png" alt="IterativePFN — Arabidopsis_d14_Control_A2_D36_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_d14_Control_A2_D36_completa.png" alt="PathNet — Arabidopsis_d14_Control_A2_D36_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_d14_Control_A2_D36_completa.png" alt="StraightPCF — Arabidopsis_d14_Control_A2_D36_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa.png" alt="IterativePFN — Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa.png" alt="PathNet — Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa.png" alt="StraightPCF — Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_max4-5_Control_A2_D33_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_max4-5_Control_A2_D33_completa.png" alt="IterativePFN — Arabidopsis_max4-5_Control_A2_D33_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_max4-5_Control_A2_D33_completa.png" alt="PathNet — Arabidopsis_max4-5_Control_A2_D33_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_max4-5_Control_A2_D33_completa.png" alt="StraightPCF — Arabidopsis_max4-5_Control_A2_D33_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_max4-5_Control_A_D27_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_max4-5_Control_A_D27_completa.png" alt="IterativePFN — Arabidopsis_max4-5_Control_A_D27_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_max4-5_Control_A_D27_completa.png" alt="PathNet — Arabidopsis_max4-5_Control_A_D27_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_max4-5_Control_A_D27_completa.png" alt="StraightPCF — Arabidopsis_max4-5_Control_A_D27_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_max4-5_Control_D_D27_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_max4-5_Control_D_D27_completa.png" alt="IterativePFN — Arabidopsis_max4-5_Control_D_D27_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_max4-5_Control_D_D27_completa.png" alt="PathNet — Arabidopsis_max4-5_Control_D_D27_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_max4-5_Control_D_D27_completa.png" alt="StraightPCF — Arabidopsis_max4-5_Control_D_D27_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">Arabidopsis_phyA2-11_Control_B_D36_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/Arabidopsis_phyA2-11_Control_B_D36_completa.png" alt="IterativePFN — Arabidopsis_phyA2-11_Control_B_D36_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/Arabidopsis_phyA2-11_Control_B_D36_completa.png" alt="PathNet — Arabidopsis_phyA2-11_Control_B_D36_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/Arabidopsis_phyA2-11_Control_B_D36_completa.png" alt="StraightPCF — Arabidopsis_phyA2-11_Control_B_D36_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD1281-4-2-3"><td colspan="4">LD1281-4-2-3</td></tr>
+  <tr>
+    <td class="muestra-cel">LD1281-4-2-3_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD1281-4-2-3_completa.png" alt="IterativePFN — LD1281-4-2-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD1281-4-2-3_completa.png" alt="PathNet — LD1281-4-2-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD1281-4-2-3_completa.png" alt="StraightPCF — LD1281-4-2-3_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD1281-5-2-1"><td colspan="4">LD1281-5-2-1</td></tr>
+  <tr>
+    <td class="muestra-cel">LD1281-5-2-1_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD1281-5-2-1_completa.png" alt="IterativePFN — LD1281-5-2-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD1281-5-2-1_completa.png" alt="PathNet — LD1281-5-2-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD1281-5-2-1_completa.png" alt="StraightPCF — LD1281-5-2-1_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD1281-7-4-2"><td colspan="4">LD1281-7-4-2</td></tr>
+  <tr>
+    <td class="muestra-cel">LD1281-7-4-2_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD1281-7-4-2_completa.png" alt="IterativePFN — LD1281-7-4-2_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD1281-7-4-2_completa.png" alt="PathNet — LD1281-7-4-2_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD1281-7-4-2_completa.png" alt="StraightPCF — LD1281-7-4-2_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD145-5-3-1"><td colspan="4">LD145-5-3-1</td></tr>
+  <tr>
+    <td class="muestra-cel">LD145-5-3-1_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD145-5-3-1_completa.png" alt="IterativePFN — LD145-5-3-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD145-5-3-1_completa.png" alt="PathNet — LD145-5-3-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD145-5-3-1_completa.png" alt="StraightPCF — LD145-5-3-1_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD502-9-6-3"><td colspan="4">LD502-9-6-3</td></tr>
+  <tr>
+    <td class="muestra-cel">LD502-9-6-3_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD502-9-6-3_completa.png" alt="IterativePFN — LD502-9-6-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD502-9-6-3_completa.png" alt="PathNet — LD502-9-6-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD502-9-6-3_completa.png" alt="StraightPCF — LD502-9-6-3_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD586-6-3-2"><td colspan="4">LD586-6-3-2</td></tr>
+  <tr>
+    <td class="muestra-cel">LD586-6-3-2_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD586-6-3-2_completa.png" alt="IterativePFN — LD586-6-3-2_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD586-6-3-2_completa.png" alt="PathNet — LD586-6-3-2_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD586-6-3-2_completa.png" alt="StraightPCF — LD586-6-3-2_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD586-6-4-2"><td colspan="4">LD586-6-4-2</td></tr>
+  <tr>
+    <td class="muestra-cel">LD586-6-4-2_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD586-6-4-2_completa.png" alt="IterativePFN — LD586-6-4-2_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD586-6-4-2_completa.png" alt="PathNet — LD586-6-4-2_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD586-6-4-2_completa.png" alt="StraightPCF — LD586-6-4-2_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD586-7-4-1"><td colspan="4">LD586-7-4-1</td></tr>
+  <tr>
+    <td class="muestra-cel">LD586-7-4-1_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD586-7-4-1_completa.png" alt="IterativePFN — LD586-7-4-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD586-7-4-1_completa.png" alt="PathNet — LD586-7-4-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD586-7-4-1_completa.png" alt="StraightPCF — LD586-7-4-1_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="LD586-9-4-1"><td colspan="4">LD586-9-4-1</td></tr>
+  <tr>
+    <td class="muestra-cel">LD586-9-4-1_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/LD586-9-4-1_completa.png" alt="IterativePFN — LD586-9-4-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/LD586-9-4-1_completa.png" alt="PathNet — LD586-9-4-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/LD586-9-4-1_completa.png" alt="StraightPCF — LD586-9-4-1_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-3-1-13"><td colspan="4">XY335-3-1-13</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-3-1-13_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-3-1-13_completa.png" alt="IterativePFN — XY335-3-1-13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-3-1-13_completa.png" alt="PathNet — XY335-3-1-13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-3-1-13_completa.png" alt="StraightPCF — XY335-3-1-13_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-3-1-3"><td colspan="4">XY335-3-1-3</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-3-1-3_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-3-1-3_completa.png" alt="IterativePFN — XY335-3-1-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-3-1-3_completa.png" alt="PathNet — XY335-3-1-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-3-1-3_completa.png" alt="StraightPCF — XY335-3-1-3_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-4-2-11"><td colspan="4">XY335-4-2-11</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-4-2-11_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-4-2-11_completa.png" alt="IterativePFN — XY335-4-2-11_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-4-2-11_completa.png" alt="PathNet — XY335-4-2-11_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-4-2-11_completa.png" alt="StraightPCF — XY335-4-2-11_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-5-3-17"><td colspan="4">XY335-5-3-17</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-5-3-17_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-5-3-17_completa.png" alt="IterativePFN — XY335-5-3-17_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-5-3-17_completa.png" alt="PathNet — XY335-5-3-17_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-5-3-17_completa.png" alt="StraightPCF — XY335-5-3-17_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-5-3-3"><td colspan="4">XY335-5-3-3</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-5-3-3_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-5-3-3_completa.png" alt="IterativePFN — XY335-5-3-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-5-3-3_completa.png" alt="PathNet — XY335-5-3-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-5-3-3_completa.png" alt="StraightPCF — XY335-5-3-3_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-5-3-47"><td colspan="4">XY335-5-3-47</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-5-3-47_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-5-3-47_completa.png" alt="IterativePFN — XY335-5-3-47_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-5-3-47_completa.png" alt="PathNet — XY335-5-3-47_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-5-3-47_completa.png" alt="StraightPCF — XY335-5-3-47_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-5-3-59"><td colspan="4">XY335-5-3-59</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-5-3-59_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-5-3-59_completa.png" alt="IterativePFN — XY335-5-3-59_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-5-3-59_completa.png" alt="PathNet — XY335-5-3-59_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-5-3-59_completa.png" alt="StraightPCF — XY335-5-3-59_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-6-3-21"><td colspan="4">XY335-6-3-21</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-6-3-21_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-6-3-21_completa.png" alt="IterativePFN — XY335-6-3-21_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-6-3-21_completa.png" alt="PathNet — XY335-6-3-21_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-6-3-21_completa.png" alt="StraightPCF — XY335-6-3-21_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-6-3-41"><td colspan="4">XY335-6-3-41</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-6-3-41_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-6-3-41_completa.png" alt="IterativePFN — XY335-6-3-41_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-6-3-41_completa.png" alt="PathNet — XY335-6-3-41_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-6-3-41_completa.png" alt="StraightPCF — XY335-6-3-41_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-6-4-25"><td colspan="4">XY335-6-4-25</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-6-4-25_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-6-4-25_completa.png" alt="IterativePFN — XY335-6-4-25_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-6-4-25_completa.png" alt="PathNet — XY335-6-4-25_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-6-4-25_completa.png" alt="StraightPCF — XY335-6-4-25_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-6-4-34"><td colspan="4">XY335-6-4-34</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-6-4-34_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-6-4-34_completa.png" alt="IterativePFN — XY335-6-4-34_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-6-4-34_completa.png" alt="PathNet — XY335-6-4-34_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-6-4-34_completa.png" alt="StraightPCF — XY335-6-4-34_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-6-4-39"><td colspan="4">XY335-6-4-39</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-6-4-39_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-6-4-39_completa.png" alt="IterativePFN — XY335-6-4-39_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-6-4-39_completa.png" alt="PathNet — XY335-6-4-39_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-6-4-39_completa.png" alt="StraightPCF — XY335-6-4-39_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-7-3-4"><td colspan="4">XY335-7-3-4</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-7-3-4_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-7-3-4_completa.png" alt="IterativePFN — XY335-7-3-4_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-7-3-4_completa.png" alt="PathNet — XY335-7-3-4_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-7-3-4_completa.png" alt="StraightPCF — XY335-7-3-4_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-7-3-6"><td colspan="4">XY335-7-3-6</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-7-3-6_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-7-3-6_completa.png" alt="IterativePFN — XY335-7-3-6_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-7-3-6_completa.png" alt="PathNet — XY335-7-3-6_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-7-3-6_completa.png" alt="StraightPCF — XY335-7-3-6_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-7-4-10"><td colspan="4">XY335-7-4-10</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-7-4-10_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-7-4-10_completa.png" alt="IterativePFN — XY335-7-4-10_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-7-4-10_completa.png" alt="PathNet — XY335-7-4-10_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-7-4-10_completa.png" alt="StraightPCF — XY335-7-4-10_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-7-4-17"><td colspan="4">XY335-7-4-17</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-7-4-17_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-7-4-17_completa.png" alt="IterativePFN — XY335-7-4-17_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-7-4-17_completa.png" alt="PathNet — XY335-7-4-17_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-7-4-17_completa.png" alt="StraightPCF — XY335-7-4-17_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-7-5-6"><td colspan="4">XY335-7-5-6</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-7-5-6_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-7-5-6_completa.png" alt="IterativePFN — XY335-7-5-6_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-7-5-6_completa.png" alt="PathNet — XY335-7-5-6_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-7-5-6_completa.png" alt="StraightPCF — XY335-7-5-6_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-8-3-1"><td colspan="4">XY335-8-3-1</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-8-3-1_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-8-3-1_completa.png" alt="IterativePFN — XY335-8-3-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-8-3-1_completa.png" alt="PathNet — XY335-8-3-1_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-8-3-1_completa.png" alt="StraightPCF — XY335-8-3-1_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-8-3-3"><td colspan="4">XY335-8-3-3</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-8-3-3_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-8-3-3_completa.png" alt="IterativePFN — XY335-8-3-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-8-3-3_completa.png" alt="PathNet — XY335-8-3-3_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-8-3-3_completa.png" alt="StraightPCF — XY335-8-3-3_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-8-5-11"><td colspan="4">XY335-8-5-11</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-8-5-11_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-8-5-11_completa.png" alt="IterativePFN — XY335-8-5-11_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-8-5-11_completa.png" alt="PathNet — XY335-8-5-11_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-8-5-11_completa.png" alt="StraightPCF — XY335-8-5-11_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-8-5-5"><td colspan="4">XY335-8-5-5</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-8-5-5_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-8-5-5_completa.png" alt="IterativePFN — XY335-8-5-5_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-8-5-5_completa.png" alt="PathNet — XY335-8-5-5_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-8-5-5_completa.png" alt="StraightPCF — XY335-8-5-5_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="XY335-9-6-5"><td colspan="4">XY335-9-6-5</td></tr>
+  <tr>
+    <td class="muestra-cel">XY335-9-6-5_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/XY335-9-6-5_completa.png" alt="IterativePFN — XY335-9-6-5_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/XY335-9-6-5_completa.png" alt="PathNet — XY335-9-6-5_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/XY335-9-6-5_completa.png" alt="StraightPCF — XY335-9-6-5_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="benthi"><td colspan="4">benthi</td></tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_A_D18_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_control_A_D18_completa.png" alt="IterativePFN — benthi_control_A_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_control_A_D18_completa.png" alt="PathNet — benthi_control_A_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_control_A_D18_completa.png" alt="StraightPCF — benthi_control_A_D18_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_A_D30_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_control_A_D30_completa.png" alt="IterativePFN — benthi_control_A_D30_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_control_A_D30_completa.png" alt="PathNet — benthi_control_A_D30_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_control_A_D30_completa.png" alt="StraightPCF — benthi_control_A_D30_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_C_D16_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_control_C_D16_completa.png" alt="IterativePFN — benthi_control_C_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_control_C_D16_completa.png" alt="PathNet — benthi_control_C_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_control_C_D16_completa.png" alt="StraightPCF — benthi_control_C_D16_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_control_C_D22_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_control_C_D22_completa.png" alt="IterativePFN — benthi_control_C_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_control_C_D22_completa.png" alt="PathNet — benthi_control_C_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_control_C_D22_completa.png" alt="StraightPCF — benthi_control_C_D22_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_heat_B_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_heat_B_D00_completa.png" alt="IterativePFN — benthi_heat_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_heat_B_D00_completa.png" alt="PathNet — benthi_heat_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_heat_B_D00_completa.png" alt="StraightPCF — benthi_heat_B_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_heat_B_D04_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_heat_B_D04_completa.png" alt="IterativePFN — benthi_heat_B_D04_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_heat_B_D04_completa.png" alt="PathNet — benthi_heat_B_D04_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_heat_B_D04_completa.png" alt="StraightPCF — benthi_heat_B_D04_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_A_D02_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_shade_A_D02_completa.png" alt="IterativePFN — benthi_shade_A_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_shade_A_D02_completa.png" alt="PathNet — benthi_shade_A_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_shade_A_D02_completa.png" alt="StraightPCF — benthi_shade_A_D02_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_A_D22_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_shade_A_D22_completa.png" alt="IterativePFN — benthi_shade_A_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_shade_A_D22_completa.png" alt="PathNet — benthi_shade_A_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_shade_A_D22_completa.png" alt="StraightPCF — benthi_shade_A_D22_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_B_D02_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_shade_B_D02_completa.png" alt="IterativePFN — benthi_shade_B_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_shade_B_D02_completa.png" alt="PathNet — benthi_shade_B_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_shade_B_D02_completa.png" alt="StraightPCF — benthi_shade_B_D02_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_B_D08_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_shade_B_D08_completa.png" alt="IterativePFN — benthi_shade_B_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_shade_B_D08_completa.png" alt="PathNet — benthi_shade_B_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_shade_B_D08_completa.png" alt="StraightPCF — benthi_shade_B_D08_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">benthi_shade_B_D14_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/benthi_shade_B_D14_completa.png" alt="IterativePFN — benthi_shade_B_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/benthi_shade_B_D14_completa.png" alt="PathNet — benthi_shade_B_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/benthi_shade_B_D14_completa.png" alt="StraightPCF — benthi_shade_B_D14_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="m82D"><td colspan="4">m82D</td></tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_A_D05_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_A_D05_completa.png" alt="IterativePFN — m82D_control1_A_D05_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_A_D05_completa.png" alt="PathNet — m82D_control1_A_D05_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_A_D05_completa.png" alt="StraightPCF — m82D_control1_A_D05_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_A_D13_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_A_D13_completa.png" alt="IterativePFN — m82D_control1_A_D13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_A_D13_completa.png" alt="PathNet — m82D_control1_A_D13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_A_D13_completa.png" alt="StraightPCF — m82D_control1_A_D13_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_A_D16_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_A_D16_completa.png" alt="IterativePFN — m82D_control1_A_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_A_D16_completa.png" alt="PathNet — m82D_control1_A_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_A_D16_completa.png" alt="StraightPCF — m82D_control1_A_D16_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D03_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_B_D03_completa.png" alt="IterativePFN — m82D_control1_B_D03_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_B_D03_completa.png" alt="PathNet — m82D_control1_B_D03_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_B_D03_completa.png" alt="StraightPCF — m82D_control1_B_D03_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D13_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_B_D13_completa.png" alt="IterativePFN — m82D_control1_B_D13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_B_D13_completa.png" alt="PathNet — m82D_control1_B_D13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_B_D13_completa.png" alt="StraightPCF — m82D_control1_B_D13_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D16_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_B_D16_completa.png" alt="IterativePFN — m82D_control1_B_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_B_D16_completa.png" alt="PathNet — m82D_control1_B_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_B_D16_completa.png" alt="StraightPCF — m82D_control1_B_D16_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control1_B_D18_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control1_B_D18_completa.png" alt="IterativePFN — m82D_control1_B_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control1_B_D18_completa.png" alt="PathNet — m82D_control1_B_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control1_B_D18_completa.png" alt="StraightPCF — m82D_control1_B_D18_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_A_D18_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control2_A_D18_completa.png" alt="IterativePFN — m82D_control2_A_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control2_A_D18_completa.png" alt="PathNet — m82D_control2_A_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control2_A_D18_completa.png" alt="StraightPCF — m82D_control2_A_D18_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_A_D20_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control2_A_D20_completa.png" alt="IterativePFN — m82D_control2_A_D20_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control2_A_D20_completa.png" alt="PathNet — m82D_control2_A_D20_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control2_A_D20_completa.png" alt="StraightPCF — m82D_control2_A_D20_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D02_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control2_C_D02_completa.png" alt="IterativePFN — m82D_control2_C_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control2_C_D02_completa.png" alt="PathNet — m82D_control2_C_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control2_C_D02_completa.png" alt="StraightPCF — m82D_control2_C_D02_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D08_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control2_C_D08_completa.png" alt="IterativePFN — m82D_control2_C_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control2_C_D08_completa.png" alt="PathNet — m82D_control2_C_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control2_C_D08_completa.png" alt="StraightPCF — m82D_control2_C_D08_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D12_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control2_C_D12_completa.png" alt="IterativePFN — m82D_control2_C_D12_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control2_C_D12_completa.png" alt="PathNet — m82D_control2_C_D12_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control2_C_D12_completa.png" alt="StraightPCF — m82D_control2_C_D12_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_control2_C_D14_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_control2_C_D14_completa.png" alt="IterativePFN — m82D_control2_C_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_control2_C_D14_completa.png" alt="PathNet — m82D_control2_C_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_control2_C_D14_completa.png" alt="StraightPCF — m82D_control2_C_D14_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_A_D26_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_A_D26_completa.png" alt="IterativePFN — m82D_drought_A_D26_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_A_D26_completa.png" alt="PathNet — m82D_drought_A_D26_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_A_D26_completa.png" alt="StraightPCF — m82D_drought_A_D26_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_A_D30_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_A_D30_completa.png" alt="IterativePFN — m82D_drought_A_D30_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_A_D30_completa.png" alt="PathNet — m82D_drought_A_D30_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_A_D30_completa.png" alt="StraightPCF — m82D_drought_A_D30_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D04_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_B_D04_completa.png" alt="IterativePFN — m82D_drought_B_D04_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_B_D04_completa.png" alt="PathNet — m82D_drought_B_D04_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_B_D04_completa.png" alt="StraightPCF — m82D_drought_B_D04_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D06_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_B_D06_completa.png" alt="IterativePFN — m82D_drought_B_D06_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_B_D06_completa.png" alt="PathNet — m82D_drought_B_D06_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_B_D06_completa.png" alt="StraightPCF — m82D_drought_B_D06_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D14_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_B_D14_completa.png" alt="IterativePFN — m82D_drought_B_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_B_D14_completa.png" alt="PathNet — m82D_drought_B_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_B_D14_completa.png" alt="StraightPCF — m82D_drought_B_D14_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_B_D16_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_B_D16_completa.png" alt="IterativePFN — m82D_drought_B_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_B_D16_completa.png" alt="PathNet — m82D_drought_B_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_B_D16_completa.png" alt="StraightPCF — m82D_drought_B_D16_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_drought_C_D08_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_drought_C_D08_completa.png" alt="IterativePFN — m82D_drought_C_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_drought_C_D08_completa.png" alt="PathNet — m82D_drought_C_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_drought_C_D08_completa.png" alt="StraightPCF — m82D_drought_C_D08_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_B_D08_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_heat_B_D08_completa.png" alt="IterativePFN — m82D_heat_B_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_heat_B_D08_completa.png" alt="PathNet — m82D_heat_B_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_heat_B_D08_completa.png" alt="StraightPCF — m82D_heat_B_D08_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_B_D15_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_heat_B_D15_completa.png" alt="IterativePFN — m82D_heat_B_D15_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_heat_B_D15_completa.png" alt="PathNet — m82D_heat_B_D15_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_heat_B_D15_completa.png" alt="StraightPCF — m82D_heat_B_D15_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_C_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_heat_C_D00_completa.png" alt="IterativePFN — m82D_heat_C_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_heat_C_D00_completa.png" alt="PathNet — m82D_heat_C_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_heat_C_D00_completa.png" alt="StraightPCF — m82D_heat_C_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_heat_C_D03_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_heat_C_D03_completa.png" alt="IterativePFN — m82D_heat_C_D03_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_heat_C_D03_completa.png" alt="PathNet — m82D_heat_C_D03_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_heat_C_D03_completa.png" alt="StraightPCF — m82D_heat_C_D03_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_A_D10_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_highlight_A_D10_completa.png" alt="IterativePFN — m82D_highlight_A_D10_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_highlight_A_D10_completa.png" alt="PathNet — m82D_highlight_A_D10_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_highlight_A_D10_completa.png" alt="StraightPCF — m82D_highlight_A_D10_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_A_D16_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_highlight_A_D16_completa.png" alt="IterativePFN — m82D_highlight_A_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_highlight_A_D16_completa.png" alt="PathNet — m82D_highlight_A_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_highlight_A_D16_completa.png" alt="StraightPCF — m82D_highlight_A_D16_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_B_D10_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_highlight_B_D10_completa.png" alt="IterativePFN — m82D_highlight_B_D10_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_highlight_B_D10_completa.png" alt="PathNet — m82D_highlight_B_D10_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_highlight_B_D10_completa.png" alt="StraightPCF — m82D_highlight_B_D10_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_highlight_C_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_highlight_C_D00_completa.png" alt="IterativePFN — m82D_highlight_C_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_highlight_C_D00_completa.png" alt="PathNet — m82D_highlight_C_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_highlight_C_D00_completa.png" alt="StraightPCF — m82D_highlight_C_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_A_D24_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_shade_A_D24_completa.png" alt="IterativePFN — m82D_shade_A_D24_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_shade_A_D24_completa.png" alt="PathNet — m82D_shade_A_D24_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_shade_A_D24_completa.png" alt="StraightPCF — m82D_shade_A_D24_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_B_D13_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_shade_B_D13_completa.png" alt="IterativePFN — m82D_shade_B_D13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_shade_B_D13_completa.png" alt="PathNet — m82D_shade_B_D13_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_shade_B_D13_completa.png" alt="StraightPCF — m82D_shade_B_D13_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_C_D18_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_shade_C_D18_completa.png" alt="IterativePFN — m82D_shade_C_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_shade_C_D18_completa.png" alt="PathNet — m82D_shade_C_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_shade_C_D18_completa.png" alt="StraightPCF — m82D_shade_C_D18_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">m82D_shade_C_D21_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/m82D_shade_C_D21_completa.png" alt="IterativePFN — m82D_shade_C_D21_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/m82D_shade_C_D21_completa.png" alt="PathNet — m82D_shade_C_D21_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/m82D_shade_C_D21_completa.png" alt="StraightPCF — m82D_shade_C_D21_completa" loading="lazy"></td>
+  </tr>
+  <tr class="group-header" id="sorghum"><td colspan="4">sorghum</td></tr>
+  <tr>
+    <td class="muestra-cel">sorghum_control_A_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_control_A_D00_completa.png" alt="IterativePFN — sorghum_control_A_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_control_A_D00_completa.png" alt="PathNet — sorghum_control_A_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_control_A_D00_completa.png" alt="StraightPCF — sorghum_control_A_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_control_B_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_control_B_D00_completa.png" alt="IterativePFN — sorghum_control_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_control_B_D00_completa.png" alt="PathNet — sorghum_control_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_control_B_D00_completa.png" alt="StraightPCF — sorghum_control_B_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_control_C_D16_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_control_C_D16_completa.png" alt="IterativePFN — sorghum_control_C_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_control_C_D16_completa.png" alt="PathNet — sorghum_control_C_D16_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_control_C_D16_completa.png" alt="StraightPCF — sorghum_control_C_D16_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_heat_A_D02_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_heat_A_D02_completa.png" alt="IterativePFN — sorghum_heat_A_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_heat_A_D02_completa.png" alt="PathNet — sorghum_heat_A_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_heat_A_D02_completa.png" alt="StraightPCF — sorghum_heat_A_D02_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_heat_A_D12_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_heat_A_D12_completa.png" alt="IterativePFN — sorghum_heat_A_D12_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_heat_A_D12_completa.png" alt="PathNet — sorghum_heat_A_D12_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_heat_A_D12_completa.png" alt="StraightPCF — sorghum_heat_A_D12_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_heat_A_D22_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_heat_A_D22_completa.png" alt="IterativePFN — sorghum_heat_A_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_heat_A_D22_completa.png" alt="PathNet — sorghum_heat_A_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_heat_A_D22_completa.png" alt="StraightPCF — sorghum_heat_A_D22_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_heat_C_D18_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_heat_C_D18_completa.png" alt="IterativePFN — sorghum_heat_C_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_heat_C_D18_completa.png" alt="PathNet — sorghum_heat_C_D18_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_heat_C_D18_completa.png" alt="StraightPCF — sorghum_heat_C_D18_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_highlight_A_D08_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_highlight_A_D08_completa.png" alt="IterativePFN — sorghum_highlight_A_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_highlight_A_D08_completa.png" alt="PathNet — sorghum_highlight_A_D08_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_highlight_A_D08_completa.png" alt="StraightPCF — sorghum_highlight_A_D08_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_highlight_A_D14_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_highlight_A_D14_completa.png" alt="IterativePFN — sorghum_highlight_A_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_highlight_A_D14_completa.png" alt="PathNet — sorghum_highlight_A_D14_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_highlight_A_D14_completa.png" alt="StraightPCF — sorghum_highlight_A_D14_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_highlight_B_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_highlight_B_D00_completa.png" alt="IterativePFN — sorghum_highlight_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_highlight_B_D00_completa.png" alt="PathNet — sorghum_highlight_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_highlight_B_D00_completa.png" alt="StraightPCF — sorghum_highlight_B_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_highlight_C_D02_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_highlight_C_D02_completa.png" alt="IterativePFN — sorghum_highlight_C_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_highlight_C_D02_completa.png" alt="PathNet — sorghum_highlight_C_D02_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_highlight_C_D02_completa.png" alt="StraightPCF — sorghum_highlight_C_D02_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_shade_A_D22_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_shade_A_D22_completa.png" alt="IterativePFN — sorghum_shade_A_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_shade_A_D22_completa.png" alt="PathNet — sorghum_shade_A_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_shade_A_D22_completa.png" alt="StraightPCF — sorghum_shade_A_D22_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_shade_B_D00_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_shade_B_D00_completa.png" alt="IterativePFN — sorghum_shade_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_shade_B_D00_completa.png" alt="PathNet — sorghum_shade_B_D00_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_shade_B_D00_completa.png" alt="StraightPCF — sorghum_shade_B_D00_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_shade_B_D12_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_shade_B_D12_completa.png" alt="IterativePFN — sorghum_shade_B_D12_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_shade_B_D12_completa.png" alt="PathNet — sorghum_shade_B_D12_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_shade_B_D12_completa.png" alt="StraightPCF — sorghum_shade_B_D12_completa" loading="lazy"></td>
+  </tr>
+  <tr>
+    <td class="muestra-cel">sorghum_shade_C_D22_completa</td>
+    <td class="img-cel mcel-0"><img src="imagenes/IterativePFN/sorghum_shade_C_D22_completa.png" alt="IterativePFN — sorghum_shade_C_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-1"><img src="imagenes/PathNet/sorghum_shade_C_D22_completa.png" alt="PathNet — sorghum_shade_C_D22_completa" loading="lazy"></td>
+    <td class="img-cel mcel-2"><img src="imagenes/StraightPCF/sorghum_shade_C_D22_completa.png" alt="StraightPCF — sorghum_shade_C_D22_completa" loading="lazy"></td>
+  </tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>
