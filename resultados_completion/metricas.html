@@ -7,48 +7,19 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1b2a;color:#e0e8f0;min-height:100vh}
-
-  /* ── topbar ── */
-  .topbar{
-    background:#1a3a5c;
-    padding:18px 28px;
-    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-    border-bottom:1px solid #4a90d933;
-  }
+  .topbar{background:#1a3a5c;padding:18px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid #4a90d933}
   .topbar h1{font-size:16px;font-weight:600;color:#fff;flex:1;line-height:1.3}
-  .topbar .tag{
-    font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-    font-weight:600;color:#4a90d9;
-  }
-  .btn-back{
-    background:rgba(255,255,255,.08);color:#e0e8f0;
-    border:1px solid rgba(255,255,255,.2);padding:7px 16px;
-    border-radius:8px;text-decoration:none;font-size:13px;
-    transition:background .15s;
-  }
+  .topbar .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:#4a90d9}
+  .btn-back{background:rgba(255,255,255,.08);color:#e0e8f0;border:1px solid rgba(255,255,255,.2);padding:7px 16px;border-radius:8px;text-decoration:none;font-size:13px}
   .btn-back:hover{background:rgba(255,255,255,.15)}
-
-  /* ── botones sección ── */
   .sec-btns{display:flex;gap:12px;padding:24px 28px 0;flex-wrap:wrap}
-  .sbtn{
-    padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;
-    border:1px solid #4a90d9;cursor:pointer;transition:all .15s;text-decoration:none;
-  }
+  .sbtn{padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid #4a90d9;cursor:pointer;transition:all .15s;text-decoration:none}
   .sbtn.on{background:#4a90d9;color:#0d1b2a}
   .sbtn.off{background:transparent;color:#4a90d9}
   .sbtn:hover{opacity:.85}
-
-  /* ── contenido ── */
   .content{padding:24px 28px;max-width:1400px}
   .section{display:none}.section.active{display:block}
-  .sec-title{
-    font-size:12px;font-weight:600;color:#4a90d9;
-    letter-spacing:.06em;text-transform:uppercase;
-    margin:0 0 14px;padding-bottom:8px;
-    border-bottom:1px solid #1a3a5c;
-  }
-
-  /* ── tablas ── */
+  .sec-title{font-size:12px;font-weight:600;color:#4a90d9;letter-spacing:.06em;text-transform:uppercase;margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid #1a3a5c}
   .twrap{overflow-x:auto;border-radius:12px;background:#142030;border:1px solid #1e3248;margin-bottom:28px}
   table{border-collapse:collapse;width:100%;font-size:12px}
   th,td{padding:9px 13px;border-bottom:1px solid #1e3248;white-space:nowrap}
@@ -56,29 +27,17 @@
   td{vertical-align:middle;text-align:center;color:#aabbcc}
   td.cm{text-align:left;color:#e0e8f0;font-weight:600;font-size:11px;background:#0f2035;min-width:150px}
   td.cd{text-align:left;color:#7a93aa;font-size:11px;max-width:260px;white-space:normal;min-width:180px}
-  td.cs{
-    text-align:left;font-family:Consolas,monospace;font-size:10px;
-    color:#7a93aa;background:#0f2035;border-right:1px solid #1e3248;
-    min-width:200px;max-width:240px;white-space:normal;word-break:break-all;
-    vertical-align:top;padding-top:10px;
-  }
+  td.cs{text-align:left;font-family:Consolas,monospace;font-size:10px;color:#7a93aa;background:#0f2035;border-right:1px solid #1e3248;min-width:200px;max-width:240px;white-space:normal;word-break:break-all;vertical-align:top;padding-top:10px}
   tr:hover td{background:#162840!important}
   tr:hover td.cs{background:#1a2f45!important}
-
-  /* ── búsqueda ── */
   .search-wrap{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .search-wrap input{
-    padding:8px 14px;background:#142030;border:1px solid #1e3248;
-    border-radius:8px;font-size:13px;color:#e0e8f0;width:320px;outline:none;
-    transition:border-color .15s;
-  }
+  .search-wrap input{padding:8px 14px;background:#142030;border:1px solid #1e3248;border-radius:8px;font-size:13px;color:#e0e8f0;width:320px;outline:none;transition:border-color .15s}
   .search-wrap input:focus{border-color:#4a90d9}
   .search-wrap input::placeholder{color:#4a6a7a}
   .search-wrap span{font-size:12px;color:#4a6a7a}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <a class="btn-back" href="index.html">← Volver</a>
   <div style="flex:1">
@@ -86,15 +45,11 @@
     <h1>Métricas cuantitativas · 94 muestras evaluadas</h1>
   </div>
 </div>
-
 <div class="sec-btns">
   <a class="sbtn on"  id="btn-glob" onclick="mostrar('glob');return false" href="#">Promedios Globales</a>
   <a class="sbtn off" id="btn-mues" onclick="mostrar('mues');return false" href="#">Por Muestra</a>
 </div>
-
 <div class="content">
-
-  <!-- GLOBALES -->
   <div class="section active" id="sec-glob">
     <p class="sec-title">Promedios globales sobre 94 muestras</p>
     <div class="twrap">
@@ -140,8 +95,6 @@
     </table>
     </div>
   </div>
-
-  <!-- POR MUESTRA -->
   <div class="section" id="sec-mues">
     <div class="search-wrap">
       <input type="text" id="buscar" placeholder="Filtrar por nombre de muestra..." oninput="filtrar()">
@@ -2509,9 +2462,7 @@
     </table>
     </div>
   </div>
-
 </div>
-
 <script>
 function mostrar(s){
   document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
