@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Métricas — Denoising · IA Generativa 3D</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1b2a;color:#e0e8f0;min-height:100vh}
+
+  /* ── topbar ── */
+  .topbar{
+    background:#1a4a36;
+    padding:18px 28px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border-bottom:1px solid #3dba7a33;
+  }
+  .topbar h1{font-size:16px;font-weight:600;color:#fff;flex:1;line-height:1.3}
+  .topbar .tag{
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:600;color:#3dba7a;
+  }
+  .btn-back{
+    background:rgba(255,255,255,.08);color:#e0e8f0;
+    border:1px solid rgba(255,255,255,.2);padding:7px 16px;
+    border-radius:8px;text-decoration:none;font-size:13px;
+    transition:background .15s;
+  }
+  .btn-back:hover{background:rgba(255,255,255,.15)}
+
+  /* ── botones sección ── */
+  .sec-btns{display:flex;gap:12px;padding:24px 28px 0;flex-wrap:wrap}
+  .sbtn{
+    padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;
+    border:1px solid #3dba7a;cursor:pointer;transition:all .15s;text-decoration:none;
+  }
+  .sbtn.on{background:#3dba7a;color:#0d1b2a}
+  .sbtn.off{background:transparent;color:#3dba7a}
+  .sbtn:hover{opacity:.85}
+
+  /* ── contenido ── */
+  .content{padding:24px 28px;max-width:1400px}
+  .section{display:none}.section.active{display:block}
+  .sec-title{
+    font-size:12px;font-weight:600;color:#3dba7a;
+    letter-spacing:.06em;text-transform:uppercase;
+    margin:0 0 14px;padding-bottom:8px;
+    border-bottom:1px solid #1a4a36;
+  }
+
+  /* ── tablas ── */
+  .twrap{overflow-x:auto;border-radius:12px;background:#142030;border:1px solid #1e3248;margin-bottom:28px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th,td{padding:9px 13px;border-bottom:1px solid #1e3248;white-space:nowrap}
+  th{font-weight:600;font-size:11px;text-align:center;position:sticky;top:0;z-index:2;background:#0f2035}
+  td{vertical-align:middle;text-align:center;color:#aabbcc}
+  td.cm{text-align:left;color:#e0e8f0;font-weight:600;font-size:11px;background:#0f2035;min-width:150px}
+  td.cd{text-align:left;color:#7a93aa;font-size:11px;max-width:260px;white-space:normal;min-width:180px}
+  td.cs{
+    text-align:left;font-family:Consolas,monospace;font-size:10px;
+    color:#7a93aa;background:#0f2035;border-right:1px solid #1e3248;
+    min-width:200px;max-width:240px;white-space:normal;word-break:break-all;
+    vertical-align:top;padding-top:10px;
+  }
+  tr:hover td{background:#162840!important}
+  tr:hover td.cs{background:#1a2f45!important}
+
+  /* ── búsqueda ── */
+  .search-wrap{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .search-wrap input{
+    padding:8px 14px;background:#142030;border:1px solid #1e3248;
+    border-radius:8px;font-size:13px;color:#e0e8f0;width:320px;outline:none;
+    transition:border-color .15s;
+  }
+  .search-wrap input:focus{border-color:#3dba7a}
+  .search-wrap input::placeholder{color:#4a6a7a}
+  .search-wrap span{font-size:12px;color:#4a6a7a}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="btn-back" href="index.html">← Volver</a>
+  <div style="flex:1">
+    <div class="tag">Denoising</div>
+    <h1>Métricas cuantitativas · 105 muestras evaluadas</h1>
+  </div>
+</div>
+
+<div class="sec-btns">
+  <a class="sbtn on"  id="btn-glob" onclick="mostrar('glob');return false" href="#">Promedios Globales</a>
+  <a class="sbtn off" id="btn-mues" onclick="mostrar('mues');return false" href="#">Por Muestra</a>
+</div>
+
+<div class="content">
+
+  <!-- GLOBALES -->
+  <div class="section active" id="sec-glob">
+    <p class="sec-title">Promedios globales sobre 105 muestras</p>
+    <div class="twrap">
+    <table>
+      <colgroup><col style="width:160px"><col style="width:260px"><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:130px"></colgroup>
+      <thead><tr>
+        <th style="text-align:left">Métrica</th>
+        <th style="text-align:left">Descripción</th>
+        <th style="background:#1a3a5c;color:#fff">IterativePFN (avg)</th><th style="background:#1a4a36;color:#fff">PathNet (avg)</th><th style="background:#4a1a3a;color:#fff">StraightPCF (avg)</th>
+        <th>Mejor modelo</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="cm">RMSE_Geométrico</td>
+          <td class="cd">Distancia RMS punto a punto vs original (menor es mejor)</td>
+          <td >0.0041</td><td >0.0031</td><td >0.0039</td>
+          <td style="text-align:center"><span style="background:#1a4a36;color:#3dba7a;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #3dba7a">PathNet</span></td>
+        </tr>
+        <tr>
+          <td class="cm">Chamfer_L1</td>
+          <td class="cd">Distancia Chamfer simetrica L1 (menor es mejor)</td>
+          <td >0.0019</td><td >0.0017</td><td >0.0024</td>
+          <td style="text-align:center"><span style="background:#1a4a36;color:#3dba7a;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #3dba7a">PathNet</span></td>
+        </tr>
+        <tr>
+          <td class="cm">Consistencia_Normales</td>
+          <td class="cd">Coseno medio entre normales estimadas 0-1 (mayor es mejor)</td>
+          <td >0.9411</td><td >0.9394</td><td >0.9379</td>
+          <td style="text-align:center"><span style="background:#1a4a36;color:#3dba7a;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #3dba7a">IterativePFN</span></td>
+        </tr>
+        <tr>
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td class="cd">% de puntos eliminados respecto al original (informativo)</td>
+          <td >0.0084</td><td >0.00e+00</td><td >0.0084</td>
+          <td style="text-align:center">—</td>
+        </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- POR MUESTRA -->
+  <div class="section" id="sec-mues">
+    <div class="search-wrap">
+      <input type="text" id="buscar" placeholder="Filtrar por nombre de muestra..." oninput="filtrar()">
+      <span id="cnt">105 muestras</span>
+    </div>
+    <div class="twrap">
+    <table id="tmuestras">
+      <colgroup><col style="width:220px"><col style="width:150px"><col style="width:110px"><col style="width:110px"><col style="width:110px"></colgroup>
+      <thead><tr>
+        <th style="text-align:left;background:#0a1520">Muestra</th>
+        <th style="text-align:left;background:#0a1520">Métrica</th>
+        <th style="background:#1a3a5c;color:#fff">IterativePFN (avg)</th><th style="background:#1a4a36;color:#fff">PathNet (avg)</th><th style="background:#4a1a3a;color:#fff">StraightPCF (avg)</th>
+      </tr></thead>
+      <tbody>
+        <tr data-m="arabidopsis_col0_control_a3_d33_completa">
+          <td class="cs" rowspan="4">Arabidopsis_col0_Control_A3_D33_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35_completa">
+          <td class="cs" rowspan="4">Arabidopsis_col0_Control_C_D35_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35_completa">
+          <td class="cs" rowspan="4">Arabidopsis_col0_Control_D_D35_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39_completa">
+          <td class="cs" rowspan="4">Arabidopsis_col0_Control_G_D39_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35_completa">
+          <td class="cs" rowspan="4">Arabidopsis_cry1-2_Control_A2_D35_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30_completa">
+          <td class="cs" rowspan="4">Arabidopsis_cry1-2_Control_A_D30_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31_completa">
+          <td class="cs" rowspan="4">Arabidopsis_cry1-2_Control_A_D31_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39_completa">
+          <td class="cs" rowspan="4">Arabidopsis_cry1-2_Control_C3_D39_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35_completa">
+          <td class="cs" rowspan="4">Arabidopsis_cry1-2_Control_F_D35_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36_completa">
+          <td class="cs" rowspan="4">Arabidopsis_cry1-2_Control_G_D36_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36_completa">
+          <td class="cs" rowspan="4">Arabidopsis_d14_Control_A2_D36_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44_completa">
+          <td class="cs" rowspan="4">Arabidopsis_d14pin3pin4pin7_Control_C2_D44_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33_completa">
+          <td class="cs" rowspan="4">Arabidopsis_max4-5_Control_A2_D33_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27_completa">
+          <td class="cs" rowspan="4">Arabidopsis_max4-5_Control_A_D27_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27_completa">
+          <td class="cs" rowspan="4">Arabidopsis_max4-5_Control_D_D27_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36_completa">
+          <td class="cs" rowspan="4">Arabidopsis_phyA2-11_Control_B_D36_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3_completa">
+          <td class="cs" rowspan="4">LD1281-4-2-3_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-5-2-1_completa">
+          <td class="cs" rowspan="4">LD1281-5-2-1_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-5-2-1_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-5-2-1_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-5-2-1_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2_completa">
+          <td class="cs" rowspan="4">LD1281-7-4-2_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld145-5-3-1_completa">
+          <td class="cs" rowspan="4">LD145-5-3-1_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld145-5-3-1_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld145-5-3-1_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld145-5-3-1_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld502-9-6-3_completa">
+          <td class="cs" rowspan="4">LD502-9-6-3_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld502-9-6-3_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld502-9-6-3_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld502-9-6-3_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-3-2_completa">
+          <td class="cs" rowspan="4">LD586-6-3-2_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-3-2_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-3-2_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-3-2_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-4-2_completa">
+          <td class="cs" rowspan="4">LD586-6-4-2_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-4-2_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-4-2_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-6-4-2_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-7-4-1_completa">
+          <td class="cs" rowspan="4">LD586-7-4-1_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-7-4-1_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-7-4-1_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-7-4-1_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-9-4-1_completa">
+          <td class="cs" rowspan="4">LD586-9-4-1_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-9-4-1_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-9-4-1_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="ld586-9-4-1_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-13_completa">
+          <td class="cs" rowspan="4">XY335-3-1-13_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-13_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-13_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-13_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-3_completa">
+          <td class="cs" rowspan="4">XY335-3-1-3_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-3_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-3_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-3-1-3_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-4-2-11_completa">
+          <td class="cs" rowspan="4">XY335-4-2-11_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-4-2-11_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-4-2-11_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-4-2-11_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-17_completa">
+          <td class="cs" rowspan="4">XY335-5-3-17_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-17_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-17_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-17_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-3_completa">
+          <td class="cs" rowspan="4">XY335-5-3-3_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-3_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-3_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-3_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-47_completa">
+          <td class="cs" rowspan="4">XY335-5-3-47_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-47_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-47_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-47_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-59_completa">
+          <td class="cs" rowspan="4">XY335-5-3-59_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-59_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-59_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-5-3-59_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-21_completa">
+          <td class="cs" rowspan="4">XY335-6-3-21_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-21_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-21_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-21_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-41_completa">
+          <td class="cs" rowspan="4">XY335-6-3-41_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-41_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-41_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-3-41_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-25_completa">
+          <td class="cs" rowspan="4">XY335-6-4-25_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-25_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-25_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-25_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-34_completa">
+          <td class="cs" rowspan="4">XY335-6-4-34_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-34_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-34_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-34_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-39_completa">
+          <td class="cs" rowspan="4">XY335-6-4-39_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-39_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-39_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-6-4-39_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-4_completa">
+          <td class="cs" rowspan="4">XY335-7-3-4_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-4_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-4_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-4_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-6_completa">
+          <td class="cs" rowspan="4">XY335-7-3-6_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-6_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-6_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-3-6_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-10_completa">
+          <td class="cs" rowspan="4">XY335-7-4-10_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-10_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-10_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-10_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-17_completa">
+          <td class="cs" rowspan="4">XY335-7-4-17_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-17_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-17_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-4-17_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-5-6_completa">
+          <td class="cs" rowspan="4">XY335-7-5-6_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-5-6_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-5-6_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-7-5-6_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-1_completa">
+          <td class="cs" rowspan="4">XY335-8-3-1_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-1_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-1_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-1_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-3_completa">
+          <td class="cs" rowspan="4">XY335-8-3-3_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-3_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-3_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-3-3_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-11_completa">
+          <td class="cs" rowspan="4">XY335-8-5-11_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-11_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-11_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-11_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-5_completa">
+          <td class="cs" rowspan="4">XY335-8-5-5_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-5_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-5_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-8-5-5_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-9-6-5_completa">
+          <td class="cs" rowspan="4">XY335-9-6-5_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-9-6-5_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-9-6-5_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="xy335-9-6-5_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18_completa">
+          <td class="cs" rowspan="4">benthi_control_A_D18_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30_completa">
+          <td class="cs" rowspan="4">benthi_control_A_D30_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16_completa">
+          <td class="cs" rowspan="4">benthi_control_C_D16_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22_completa">
+          <td class="cs" rowspan="4">benthi_control_C_D22_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00_completa">
+          <td class="cs" rowspan="4">benthi_heat_B_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04_completa">
+          <td class="cs" rowspan="4">benthi_heat_B_D04_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02_completa">
+          <td class="cs" rowspan="4">benthi_shade_A_D02_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22_completa">
+          <td class="cs" rowspan="4">benthi_shade_A_D22_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02_completa">
+          <td class="cs" rowspan="4">benthi_shade_B_D02_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08_completa">
+          <td class="cs" rowspan="4">benthi_shade_B_D08_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14_completa">
+          <td class="cs" rowspan="4">benthi_shade_B_D14_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05_completa">
+          <td class="cs" rowspan="4">m82D_control1_A_D05_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13_completa">
+          <td class="cs" rowspan="4">m82D_control1_A_D13_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16_completa">
+          <td class="cs" rowspan="4">m82D_control1_A_D16_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03_completa">
+          <td class="cs" rowspan="4">m82D_control1_B_D03_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13_completa">
+          <td class="cs" rowspan="4">m82D_control1_B_D13_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16_completa">
+          <td class="cs" rowspan="4">m82D_control1_B_D16_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18_completa">
+          <td class="cs" rowspan="4">m82D_control1_B_D18_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18_completa">
+          <td class="cs" rowspan="4">m82D_control2_A_D18_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20_completa">
+          <td class="cs" rowspan="4">m82D_control2_A_D20_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02_completa">
+          <td class="cs" rowspan="4">m82D_control2_C_D02_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08_completa">
+          <td class="cs" rowspan="4">m82D_control2_C_D08_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12_completa">
+          <td class="cs" rowspan="4">m82D_control2_C_D12_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14_completa">
+          <td class="cs" rowspan="4">m82D_control2_C_D14_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26_completa">
+          <td class="cs" rowspan="4">m82D_drought_A_D26_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30_completa">
+          <td class="cs" rowspan="4">m82D_drought_A_D30_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04_completa">
+          <td class="cs" rowspan="4">m82D_drought_B_D04_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06_completa">
+          <td class="cs" rowspan="4">m82D_drought_B_D06_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14_completa">
+          <td class="cs" rowspan="4">m82D_drought_B_D14_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16_completa">
+          <td class="cs" rowspan="4">m82D_drought_B_D16_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08_completa">
+          <td class="cs" rowspan="4">m82D_drought_C_D08_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08_completa">
+          <td class="cs" rowspan="4">m82D_heat_B_D08_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15_completa">
+          <td class="cs" rowspan="4">m82D_heat_B_D15_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00_completa">
+          <td class="cs" rowspan="4">m82D_heat_C_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03_completa">
+          <td class="cs" rowspan="4">m82D_heat_C_D03_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10_completa">
+          <td class="cs" rowspan="4">m82D_highlight_A_D10_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16_completa">
+          <td class="cs" rowspan="4">m82D_highlight_A_D16_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10_completa">
+          <td class="cs" rowspan="4">m82D_highlight_B_D10_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00_completa">
+          <td class="cs" rowspan="4">m82D_highlight_C_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24_completa">
+          <td class="cs" rowspan="4">m82D_shade_A_D24_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13_completa">
+          <td class="cs" rowspan="4">m82D_shade_B_D13_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18_completa">
+          <td class="cs" rowspan="4">m82D_shade_C_D18_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21_completa">
+          <td class="cs" rowspan="4">m82D_shade_C_D21_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00_completa">
+          <td class="cs" rowspan="4">sorghum_control_A_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00_completa">
+          <td class="cs" rowspan="4">sorghum_control_B_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16_completa">
+          <td class="cs" rowspan="4">sorghum_control_C_D16_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02_completa">
+          <td class="cs" rowspan="4">sorghum_heat_A_D02_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12_completa">
+          <td class="cs" rowspan="4">sorghum_heat_A_D12_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22_completa">
+          <td class="cs" rowspan="4">sorghum_heat_A_D22_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18_completa">
+          <td class="cs" rowspan="4">sorghum_heat_C_D18_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08_completa">
+          <td class="cs" rowspan="4">sorghum_highlight_A_D08_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14_completa">
+          <td class="cs" rowspan="4">sorghum_highlight_A_D14_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00_completa">
+          <td class="cs" rowspan="4">sorghum_highlight_B_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02_completa">
+          <td class="cs" rowspan="4">sorghum_highlight_C_D02_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22_completa">
+          <td class="cs" rowspan="4">sorghum_shade_A_D22_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00_completa">
+          <td class="cs" rowspan="4">sorghum_shade_B_D00_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12_completa">
+          <td class="cs" rowspan="4">sorghum_shade_B_D12_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22_completa">
+          <td class="cs" rowspan="4">sorghum_shade_C_D22_completa</td>
+          <td class="cm">RMSE_Geométrico</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22_completa">
+          
+          <td class="cm">Chamfer_L1</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22_completa">
+          
+          <td class="cm">Consistencia_Normales</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22_completa">
+          
+          <td class="cm">Reduccion_Puntos_%</td>
+          <td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td><td style="color:#aabbcc">—</td>
+        </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function mostrar(s){
+  document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
+  document.getElementById('sec-'+s).classList.add('active');
+  document.getElementById('btn-glob').className='sbtn '+(s==='glob'?'on':'off');
+  document.getElementById('btn-mues').className='sbtn '+(s==='mues'?'on':'off');
+}
+function filtrar(){
+  const q=document.getElementById('buscar').value.toLowerCase();
+  const rows=document.querySelectorAll('#tmuestras tbody tr');
+  const vis=new Set();
+  rows.forEach(r=>{if((r.dataset.m||'').includes(q))vis.add(r.dataset.m)});
+  let c=0;
+  rows.forEach(r=>{
+    const show=vis.has(r.dataset.m||'');
+    r.style.display=show?'':'none';
+    if(show&&r.querySelector('td.cs'))c++;
+  });
+  document.getElementById('cnt').textContent=c+' muestras';
+}
+</script>
+</body>
+</html>

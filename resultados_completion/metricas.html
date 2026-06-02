@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Métricas — Completion · IA Generativa 3D</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1b2a;color:#e0e8f0;min-height:100vh}
+
+  /* ── topbar ── */
+  .topbar{
+    background:#1a3a5c;
+    padding:18px 28px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border-bottom:1px solid #4a90d933;
+  }
+  .topbar h1{font-size:16px;font-weight:600;color:#fff;flex:1;line-height:1.3}
+  .topbar .tag{
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:600;color:#4a90d9;
+  }
+  .btn-back{
+    background:rgba(255,255,255,.08);color:#e0e8f0;
+    border:1px solid rgba(255,255,255,.2);padding:7px 16px;
+    border-radius:8px;text-decoration:none;font-size:13px;
+    transition:background .15s;
+  }
+  .btn-back:hover{background:rgba(255,255,255,.15)}
+
+  /* ── botones sección ── */
+  .sec-btns{display:flex;gap:12px;padding:24px 28px 0;flex-wrap:wrap}
+  .sbtn{
+    padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;
+    border:1px solid #4a90d9;cursor:pointer;transition:all .15s;text-decoration:none;
+  }
+  .sbtn.on{background:#4a90d9;color:#0d1b2a}
+  .sbtn.off{background:transparent;color:#4a90d9}
+  .sbtn:hover{opacity:.85}
+
+  /* ── contenido ── */
+  .content{padding:24px 28px;max-width:1400px}
+  .section{display:none}.section.active{display:block}
+  .sec-title{
+    font-size:12px;font-weight:600;color:#4a90d9;
+    letter-spacing:.06em;text-transform:uppercase;
+    margin:0 0 14px;padding-bottom:8px;
+    border-bottom:1px solid #1a3a5c;
+  }
+
+  /* ── tablas ── */
+  .twrap{overflow-x:auto;border-radius:12px;background:#142030;border:1px solid #1e3248;margin-bottom:28px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th,td{padding:9px 13px;border-bottom:1px solid #1e3248;white-space:nowrap}
+  th{font-weight:600;font-size:11px;text-align:center;position:sticky;top:0;z-index:2;background:#0f2035}
+  td{vertical-align:middle;text-align:center;color:#aabbcc}
+  td.cm{text-align:left;color:#e0e8f0;font-weight:600;font-size:11px;background:#0f2035;min-width:150px}
+  td.cd{text-align:left;color:#7a93aa;font-size:11px;max-width:260px;white-space:normal;min-width:180px}
+  td.cs{
+    text-align:left;font-family:Consolas,monospace;font-size:10px;
+    color:#7a93aa;background:#0f2035;border-right:1px solid #1e3248;
+    min-width:200px;max-width:240px;white-space:normal;word-break:break-all;
+    vertical-align:top;padding-top:10px;
+  }
+  tr:hover td{background:#162840!important}
+  tr:hover td.cs{background:#1a2f45!important}
+
+  /* ── búsqueda ── */
+  .search-wrap{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .search-wrap input{
+    padding:8px 14px;background:#142030;border:1px solid #1e3248;
+    border-radius:8px;font-size:13px;color:#e0e8f0;width:320px;outline:none;
+    transition:border-color .15s;
+  }
+  .search-wrap input:focus{border-color:#4a90d9}
+  .search-wrap input::placeholder{color:#4a6a7a}
+  .search-wrap span{font-size:12px;color:#4a6a7a}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="btn-back" href="index.html">← Volver</a>
+  <div style="flex:1">
+    <div class="tag">Completion</div>
+    <h1>Métricas cuantitativas · 94 muestras evaluadas</h1>
+  </div>
+</div>
+
+<div class="sec-btns">
+  <a class="sbtn on"  id="btn-glob" onclick="mostrar('glob');return false" href="#">Promedios Globales</a>
+  <a class="sbtn off" id="btn-mues" onclick="mostrar('mues');return false" href="#">Por Muestra</a>
+</div>
+
+<div class="content">
+
+  <!-- GLOBALES -->
+  <div class="section active" id="sec-glob">
+    <p class="sec-title">Promedios globales sobre 94 muestras</p>
+    <div class="twrap">
+    <table>
+      <colgroup><col style="width:160px"><col style="width:260px"><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:130px"></colgroup>
+      <thead><tr>
+        <th style="text-align:left">Métrica</th>
+        <th style="text-align:left">Descripción</th>
+        <th style="background:#1a3a5c;color:#fff">GrNet</th><th style="background:#1a4a36;color:#fff">SnowFlake</th><th style="background:#4a1a3a;color:#fff">treePointr</th>
+        <th>Mejor modelo</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="cm">Chamfer_Distance</td>
+          <td class="cd">Distancia Chamfer (L1) entre nube original y completada (↓ mejor)</td>
+          <td >0.0117</td><td style="color:#3dba7a;font-weight:700">0.0068</td><td >0.0093</td>
+          <td style="text-align:center"><span style="background:#1a3a5c;color:#4a90d9;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #4a90d9">SnowFlake</span></td>
+        </tr>
+        <tr>
+          <td class="cm">Hausdorff_Distance</td>
+          <td class="cd">Distancia Hausdorff — error máximo entre nubes (↓ mejor)</td>
+          <td >0.2994</td><td style="color:#3dba7a;font-weight:700">0.1341</td><td >0.1949</td>
+          <td style="text-align:center"><span style="background:#1a3a5c;color:#4a90d9;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #4a90d9">SnowFlake</span></td>
+        </tr>
+        <tr>
+          <td class="cm">F_Score</td>
+          <td class="cd">Media armónica de Precisión y Recall (↑ mejor)</td>
+          <td >0.7080</td><td style="color:#3dba7a;font-weight:700">0.8990</td><td >0.8241</td>
+          <td style="text-align:center"><span style="background:#1a3a5c;color:#4a90d9;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #4a90d9">SnowFlake</span></td>
+        </tr>
+        <tr>
+          <td class="cm">Precision</td>
+          <td class="cd">Fracción de puntos completados cercanos al original (↑ mejor)</td>
+          <td >0.5996</td><td style="color:#3dba7a;font-weight:700">0.8654</td><td >0.8236</td>
+          <td style="text-align:center"><span style="background:#1a3a5c;color:#4a90d9;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #4a90d9">SnowFlake</span></td>
+        </tr>
+        <tr>
+          <td class="cm">Recall</td>
+          <td class="cd">Fracción del original cubierta por la completación (↑ mejor)</td>
+          <td >0.9133</td><td style="color:#3dba7a;font-weight:700">0.9388</td><td >0.8352</td>
+          <td style="text-align:center"><span style="background:#1a3a5c;color:#4a90d9;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #4a90d9">SnowFlake</span></td>
+        </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- POR MUESTRA -->
+  <div class="section" id="sec-mues">
+    <div class="search-wrap">
+      <input type="text" id="buscar" placeholder="Filtrar por nombre de muestra..." oninput="filtrar()">
+      <span id="cnt">94 muestras</span>
+    </div>
+    <div class="twrap">
+    <table id="tmuestras">
+      <colgroup><col style="width:220px"><col style="width:150px"><col style="width:110px"><col style="width:110px"><col style="width:110px"></colgroup>
+      <thead><tr>
+        <th style="text-align:left;background:#0a1520">Muestra</th>
+        <th style="text-align:left;background:#0a1520">Métrica</th>
+        <th style="background:#1a3a5c;color:#fff">GrNet</th><th style="background:#1a4a36;color:#fff">SnowFlake</th><th style="background:#4a1a3a;color:#fff">treePointr</th>
+      </tr></thead>
+      <tbody>
+        <tr data-m="arabidopsis_col0_control_a3_d33">
+          <td class="cs" rowspan="5">Arabidopsis_col0_Control_A3_D33</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0108</td><td style="color:#aabbcc">0.0047</td><td style="color:#aabbcc">0.0072</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0781</td><td style="color:#aabbcc">0.0412</td><td style="color:#aabbcc">0.2339</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5196</td><td style="color:#aabbcc">0.9082</td><td style="color:#aabbcc">0.8308</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3771</td><td style="color:#aabbcc">0.9010</td><td style="color:#aabbcc">0.8809</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_a3_d33">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8354</td><td style="color:#aabbcc">0.9155</td><td style="color:#aabbcc">0.7861</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35">
+          <td class="cs" rowspan="5">Arabidopsis_col0_Control_C_D35</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0096</td><td style="color:#aabbcc">0.0035</td><td style="color:#aabbcc">0.0066</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0919</td><td style="color:#aabbcc">0.0372</td><td style="color:#aabbcc">0.1700</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5087</td><td style="color:#aabbcc">0.9364</td><td style="color:#aabbcc">0.6188</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3464</td><td style="color:#aabbcc">0.8956</td><td style="color:#aabbcc">0.4686</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_c_d35">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9570</td><td style="color:#aabbcc">0.9810</td><td style="color:#aabbcc">0.9106</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35">
+          <td class="cs" rowspan="5">Arabidopsis_col0_Control_D_D35</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0141</td><td style="color:#aabbcc">0.0065</td><td style="color:#aabbcc">0.0098</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1343</td><td style="color:#aabbcc">0.1379</td><td style="color:#aabbcc">0.1054</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5162</td><td style="color:#aabbcc">0.9114</td><td style="color:#aabbcc">0.7956</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3709</td><td style="color:#aabbcc">0.8589</td><td style="color:#aabbcc">0.7686</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_d_d35">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8486</td><td style="color:#aabbcc">0.9707</td><td style="color:#aabbcc">0.8247</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39">
+          <td class="cs" rowspan="5">Arabidopsis_col0_Control_G_D39</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0152</td><td style="color:#aabbcc">0.0059</td><td style="color:#aabbcc">0.0088</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1517</td><td style="color:#aabbcc">0.0843</td><td style="color:#aabbcc">0.1747</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4389</td><td style="color:#aabbcc">0.8535</td><td style="color:#aabbcc">0.7665</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3045</td><td style="color:#aabbcc">0.8277</td><td style="color:#aabbcc">0.8700</td>
+        </tr>
+        <tr data-m="arabidopsis_col0_control_g_d39">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.7856</td><td style="color:#aabbcc">0.8809</td><td style="color:#aabbcc">0.6851</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35">
+          <td class="cs" rowspan="5">Arabidopsis_cry1-2_Control_A2_D35</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0106</td><td style="color:#aabbcc">0.0040</td><td style="color:#aabbcc">0.0060</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0898</td><td style="color:#aabbcc">0.0358</td><td style="color:#aabbcc">0.0982</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4312</td><td style="color:#aabbcc">0.9258</td><td style="color:#aabbcc">0.8363</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.2790</td><td style="color:#aabbcc">0.8738</td><td style="color:#aabbcc">0.8357</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a2_d35">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9487</td><td style="color:#aabbcc">0.9844</td><td style="color:#aabbcc">0.8369</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30">
+          <td class="cs" rowspan="5">Arabidopsis_cry1-2_Control_A_D30</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0130</td><td style="color:#aabbcc">0.0061</td><td style="color:#aabbcc">0.0089</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0995</td><td style="color:#aabbcc">0.0910</td><td style="color:#aabbcc">0.0928</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5765</td><td style="color:#aabbcc">0.9217</td><td style="color:#aabbcc">0.8517</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4377</td><td style="color:#aabbcc">0.8743</td><td style="color:#aabbcc">0.8499</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d30">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8442</td><td style="color:#aabbcc">0.9746</td><td style="color:#aabbcc">0.8535</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31">
+          <td class="cs" rowspan="5">Arabidopsis_cry1-2_Control_A_D31</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0142</td><td style="color:#aabbcc">0.0062</td><td style="color:#aabbcc">0.0091</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0994</td><td style="color:#aabbcc">0.0750</td><td style="color:#aabbcc">0.0995</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4988</td><td style="color:#aabbcc">0.9036</td><td style="color:#aabbcc">0.8321</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3590</td><td style="color:#aabbcc">0.8654</td><td style="color:#aabbcc">0.8263</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_a_d31">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8169</td><td style="color:#aabbcc">0.9453</td><td style="color:#aabbcc">0.8379</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39">
+          <td class="cs" rowspan="5">Arabidopsis_cry1-2_Control_C3_D39</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0093</td><td style="color:#aabbcc">0.0040</td><td style="color:#aabbcc">0.0058</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0982</td><td style="color:#aabbcc">0.0452</td><td style="color:#aabbcc">0.1264</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5361</td><td style="color:#aabbcc">0.9349</td><td style="color:#aabbcc">0.8408</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3760</td><td style="color:#aabbcc">0.8870</td><td style="color:#aabbcc">0.7559</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_c3_d39">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9336</td><td style="color:#aabbcc">0.9883</td><td style="color:#aabbcc">0.9473</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35">
+          <td class="cs" rowspan="5">Arabidopsis_cry1-2_Control_F_D35</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0113</td><td style="color:#aabbcc">0.0060</td><td style="color:#aabbcc">0.0086</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0936</td><td style="color:#aabbcc">0.0453</td><td style="color:#aabbcc">0.1217</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6092</td><td style="color:#aabbcc">0.8935</td><td style="color:#aabbcc">0.7965</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4867</td><td style="color:#aabbcc">0.8475</td><td style="color:#aabbcc">0.7848</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_f_d35">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8140</td><td style="color:#aabbcc">0.9448</td><td style="color:#aabbcc">0.8086</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36">
+          <td class="cs" rowspan="5">Arabidopsis_cry1-2_Control_G_D36</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0098</td><td style="color:#aabbcc">0.0046</td><td style="color:#aabbcc">0.0059</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1021</td><td style="color:#aabbcc">0.0827</td><td style="color:#aabbcc">0.1012</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5218</td><td style="color:#aabbcc">0.8941</td><td style="color:#aabbcc">0.8447</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3770</td><td style="color:#aabbcc">0.8627</td><td style="color:#aabbcc">0.8168</td>
+        </tr>
+        <tr data-m="arabidopsis_cry1-2_control_g_d36">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8472</td><td style="color:#aabbcc">0.9277</td><td style="color:#aabbcc">0.8745</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36">
+          <td class="cs" rowspan="5">Arabidopsis_d14_Control_A2_D36</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0096</td><td style="color:#aabbcc">0.0055</td><td style="color:#aabbcc">0.0076</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0679</td><td style="color:#aabbcc">0.0495</td><td style="color:#aabbcc">0.0914</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5249</td><td style="color:#aabbcc">0.7789</td><td style="color:#aabbcc">0.6617</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3882</td><td style="color:#aabbcc">0.6783</td><td style="color:#aabbcc">0.6309</td>
+        </tr>
+        <tr data-m="arabidopsis_d14_control_a2_d36">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8101</td><td style="color:#aabbcc">0.9146</td><td style="color:#aabbcc">0.6958</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44">
+          <td class="cs" rowspan="5">Arabidopsis_d14pin3pin4pin7_Control_C2_D44</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0088</td><td style="color:#aabbcc">0.0046</td><td style="color:#aabbcc">0.0057</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0807</td><td style="color:#aabbcc">0.0431</td><td style="color:#aabbcc">0.1807</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5537</td><td style="color:#aabbcc">0.8499</td><td style="color:#aabbcc">0.7890</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4037</td><td style="color:#aabbcc">0.7953</td><td style="color:#aabbcc">0.7471</td>
+        </tr>
+        <tr data-m="arabidopsis_d14pin3pin4pin7_control_c2_d44">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8813</td><td style="color:#aabbcc">0.9126</td><td style="color:#aabbcc">0.8359</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33">
+          <td class="cs" rowspan="5">Arabidopsis_max4-5_Control_A2_D33</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0097</td><td style="color:#aabbcc">0.0051</td><td style="color:#aabbcc">0.0070</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0713</td><td style="color:#aabbcc">0.0409</td><td style="color:#aabbcc">0.1062</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4450</td><td style="color:#aabbcc">0.8273</td><td style="color:#aabbcc">0.6411</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3049</td><td style="color:#aabbcc">0.7299</td><td style="color:#aabbcc">0.5194</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a2_d33">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8232</td><td style="color:#aabbcc">0.9546</td><td style="color:#aabbcc">0.8374</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27">
+          <td class="cs" rowspan="5">Arabidopsis_max4-5_Control_A_D27</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0127</td><td style="color:#aabbcc">0.0067</td><td style="color:#aabbcc">0.0098</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1085</td><td style="color:#aabbcc">0.0562</td><td style="color:#aabbcc">0.1479</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4711</td><td style="color:#aabbcc">0.8395</td><td style="color:#aabbcc">0.6804</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3322</td><td style="color:#aabbcc">0.7833</td><td style="color:#aabbcc">0.5975</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_a_d27">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8096</td><td style="color:#aabbcc">0.9043</td><td style="color:#aabbcc">0.7900</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27">
+          <td class="cs" rowspan="5">Arabidopsis_max4-5_Control_D_D27</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0095</td><td style="color:#aabbcc">0.0058</td><td style="color:#aabbcc">0.0066</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0897</td><td style="color:#aabbcc">0.0722</td><td style="color:#aabbcc">0.1251</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6074</td><td style="color:#aabbcc">0.8505</td><td style="color:#aabbcc">0.7791</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4601</td><td style="color:#aabbcc">0.7756</td><td style="color:#aabbcc">0.7009</td>
+        </tr>
+        <tr data-m="arabidopsis_max4-5_control_d_d27">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8931</td><td style="color:#aabbcc">0.9414</td><td style="color:#aabbcc">0.8770</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36">
+          <td class="cs" rowspan="5">Arabidopsis_phyA2-11_Control_B_D36</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0142</td><td style="color:#aabbcc">0.0096</td><td style="color:#aabbcc">0.0123</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.2075</td><td style="color:#aabbcc">0.2171</td><td style="color:#aabbcc">0.2397</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6178</td><td style="color:#aabbcc">0.8601</td><td style="color:#aabbcc">0.7600</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4923</td><td style="color:#aabbcc">0.8233</td><td style="color:#aabbcc">0.7189</td>
+        </tr>
+        <tr data-m="arabidopsis_phya2-11_control_b_d36">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8291</td><td style="color:#aabbcc">0.9004</td><td style="color:#aabbcc">0.8062</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3">
+          <td class="cs" rowspan="5">LD1281-4-2-3</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0145</td><td style="color:#aabbcc">0.0077</td><td style="color:#aabbcc">0.0090</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.8475</td><td style="color:#aabbcc">0.3426</td><td style="color:#aabbcc">0.1544</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8922</td><td style="color:#aabbcc">0.9395</td><td style="color:#aabbcc">0.9263</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8531</td><td style="color:#aabbcc">0.9338</td><td style="color:#aabbcc">0.9019</td>
+        </tr>
+        <tr data-m="ld1281-4-2-3">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9351</td><td style="color:#aabbcc">0.9453</td><td style="color:#aabbcc">0.9521</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2">
+          <td class="cs" rowspan="5">LD1281-7-4-2</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0226</td><td style="color:#aabbcc">0.0092</td><td style="color:#aabbcc">0.0140</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1962</td><td style="color:#aabbcc">0.1995</td><td style="color:#aabbcc">0.3451</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9139</td><td style="color:#aabbcc">0.9211</td><td style="color:#aabbcc">0.9142</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8979</td><td style="color:#aabbcc">0.9213</td><td style="color:#aabbcc">0.9294</td>
+        </tr>
+        <tr data-m="ld1281-7-4-2">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9305</td><td style="color:#aabbcc">0.9209</td><td style="color:#aabbcc">0.8994</td>
+        </tr>
+        <tr data-m="ld145-5-3-1">
+          <td class="cs" rowspan="5">LD145-5-3-1</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0252</td><td style="color:#aabbcc">0.0101</td><td style="color:#aabbcc">0.0153</td>
+        </tr>
+        <tr data-m="ld145-5-3-1">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.0623</td><td style="color:#aabbcc">0.2716</td><td style="color:#aabbcc">0.2810</td>
+        </tr>
+        <tr data-m="ld145-5-3-1">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8388</td><td style="color:#aabbcc">0.8861</td><td style="color:#aabbcc">0.8211</td>
+        </tr>
+        <tr data-m="ld145-5-3-1">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8216</td><td style="color:#aabbcc">0.8472</td><td style="color:#aabbcc">0.8000</td>
+        </tr>
+        <tr data-m="ld145-5-3-1">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8568</td><td style="color:#aabbcc">0.9287</td><td style="color:#aabbcc">0.8433</td>
+        </tr>
+        <tr data-m="ld586-6-3-2">
+          <td class="cs" rowspan="5">LD586-6-3-2</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0209</td><td style="color:#aabbcc">0.0117</td><td style="color:#aabbcc">0.0134</td>
+        </tr>
+        <tr data-m="ld586-6-3-2">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.9481</td><td style="color:#aabbcc">0.2530</td><td style="color:#aabbcc">0.1898</td>
+        </tr>
+        <tr data-m="ld586-6-3-2">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8439</td><td style="color:#aabbcc">0.8249</td><td style="color:#aabbcc">0.8308</td>
+        </tr>
+        <tr data-m="ld586-6-3-2">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8027</td><td style="color:#aabbcc">0.7569</td><td style="color:#aabbcc">0.8427</td>
+        </tr>
+        <tr data-m="ld586-6-3-2">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8895</td><td style="color:#aabbcc">0.9062</td><td style="color:#aabbcc">0.8193</td>
+        </tr>
+        <tr data-m="ld586-7-4-1">
+          <td class="cs" rowspan="5">LD586-7-4-1</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0219</td><td style="color:#aabbcc">0.0083</td><td style="color:#aabbcc">0.0114</td>
+        </tr>
+        <tr data-m="ld586-7-4-1">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.8911</td><td style="color:#aabbcc">0.4089</td><td style="color:#aabbcc">0.1760</td>
+        </tr>
+        <tr data-m="ld586-7-4-1">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8618</td><td style="color:#aabbcc">0.9319</td><td style="color:#aabbcc">0.8809</td>
+        </tr>
+        <tr data-m="ld586-7-4-1">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8466</td><td style="color:#aabbcc">0.9142</td><td style="color:#aabbcc">0.8737</td>
+        </tr>
+        <tr data-m="ld586-7-4-1">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8775</td><td style="color:#aabbcc">0.9502</td><td style="color:#aabbcc">0.8882</td>
+        </tr>
+        <tr data-m="xy335-3-1-3">
+          <td class="cs" rowspan="5">XY335-3-1-3</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0163</td><td style="color:#aabbcc">0.0115</td><td style="color:#aabbcc">0.0120</td>
+        </tr>
+        <tr data-m="xy335-3-1-3">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.3590</td><td style="color:#aabbcc">0.1797</td><td style="color:#aabbcc">0.2082</td>
+        </tr>
+        <tr data-m="xy335-3-1-3">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9070</td><td style="color:#aabbcc">0.8785</td><td style="color:#aabbcc">0.8893</td>
+        </tr>
+        <tr data-m="xy335-3-1-3">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.9075</td><td style="color:#aabbcc">0.8456</td><td style="color:#aabbcc">0.8989</td>
+        </tr>
+        <tr data-m="xy335-3-1-3">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9065</td><td style="color:#aabbcc">0.9141</td><td style="color:#aabbcc">0.8799</td>
+        </tr>
+        <tr data-m="xy335-4-2-11">
+          <td class="cs" rowspan="5">XY335-4-2-11</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0178</td><td style="color:#aabbcc">0.0080</td><td style="color:#aabbcc">0.0100</td>
+        </tr>
+        <tr data-m="xy335-4-2-11">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.3198</td><td style="color:#aabbcc">0.3398</td><td style="color:#aabbcc">0.1756</td>
+        </tr>
+        <tr data-m="xy335-4-2-11">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9140</td><td style="color:#aabbcc">0.9273</td><td style="color:#aabbcc">0.9317</td>
+        </tr>
+        <tr data-m="xy335-4-2-11">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8973</td><td style="color:#aabbcc">0.9349</td><td style="color:#aabbcc">0.9495</td>
+        </tr>
+        <tr data-m="xy335-4-2-11">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9314</td><td style="color:#aabbcc">0.9199</td><td style="color:#aabbcc">0.9146</td>
+        </tr>
+        <tr data-m="xy335-5-3-17">
+          <td class="cs" rowspan="5">XY335-5-3-17</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0155</td><td style="color:#aabbcc">0.0073</td><td style="color:#aabbcc">0.0091</td>
+        </tr>
+        <tr data-m="xy335-5-3-17">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.0030</td><td style="color:#aabbcc">0.2256</td><td style="color:#aabbcc">0.1823</td>
+        </tr>
+        <tr data-m="xy335-5-3-17">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9292</td><td style="color:#aabbcc">0.9458</td><td style="color:#aabbcc">0.8737</td>
+        </tr>
+        <tr data-m="xy335-5-3-17">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.9139</td><td style="color:#aabbcc">0.9335</td><td style="color:#aabbcc">0.8405</td>
+        </tr>
+        <tr data-m="xy335-5-3-17">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9450</td><td style="color:#aabbcc">0.9585</td><td style="color:#aabbcc">0.9097</td>
+        </tr>
+        <tr data-m="xy335-5-3-3">
+          <td class="cs" rowspan="5">XY335-5-3-3</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0118</td><td style="color:#aabbcc">0.0071</td><td style="color:#aabbcc">0.0089</td>
+        </tr>
+        <tr data-m="xy335-5-3-3">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.7539</td><td style="color:#aabbcc">0.2720</td><td style="color:#aabbcc">0.1888</td>
+        </tr>
+        <tr data-m="xy335-5-3-3">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8756</td><td style="color:#aabbcc">0.9464</td><td style="color:#aabbcc">0.9271</td>
+        </tr>
+        <tr data-m="xy335-5-3-3">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8268</td><td style="color:#aabbcc">0.9219</td><td style="color:#aabbcc">0.9539</td>
+        </tr>
+        <tr data-m="xy335-5-3-3">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9305</td><td style="color:#aabbcc">0.9722</td><td style="color:#aabbcc">0.9019</td>
+        </tr>
+        <tr data-m="xy335-5-3-47">
+          <td class="cs" rowspan="5">XY335-5-3-47</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0200</td><td style="color:#aabbcc">0.0106</td><td style="color:#aabbcc">0.0110</td>
+        </tr>
+        <tr data-m="xy335-5-3-47">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1864</td><td style="color:#aabbcc">0.3970</td><td style="color:#aabbcc">0.2442</td>
+        </tr>
+        <tr data-m="xy335-5-3-47">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8924</td><td style="color:#aabbcc">0.8903</td><td style="color:#aabbcc">0.9036</td>
+        </tr>
+        <tr data-m="xy335-5-3-47">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8759</td><td style="color:#aabbcc">0.8223</td><td style="color:#aabbcc">0.9432</td>
+        </tr>
+        <tr data-m="xy335-5-3-47">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9096</td><td style="color:#aabbcc">0.9707</td><td style="color:#aabbcc">0.8672</td>
+        </tr>
+        <tr data-m="xy335-5-3-59">
+          <td class="cs" rowspan="5">XY335-5-3-59</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0229</td><td style="color:#aabbcc">0.0125</td><td style="color:#aabbcc">0.0188</td>
+        </tr>
+        <tr data-m="xy335-5-3-59">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1100</td><td style="color:#aabbcc">0.4010</td><td style="color:#aabbcc">0.5622</td>
+        </tr>
+        <tr data-m="xy335-5-3-59">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8860</td><td style="color:#aabbcc">0.9219</td><td style="color:#aabbcc">0.9077</td>
+        </tr>
+        <tr data-m="xy335-5-3-59">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8651</td><td style="color:#aabbcc">0.9418</td><td style="color:#aabbcc">0.9363</td>
+        </tr>
+        <tr data-m="xy335-5-3-59">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9080</td><td style="color:#aabbcc">0.9028</td><td style="color:#aabbcc">0.8809</td>
+        </tr>
+        <tr data-m="xy335-6-3-41">
+          <td class="cs" rowspan="5">XY335-6-3-41</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0237</td><td style="color:#aabbcc">0.0079</td><td style="color:#aabbcc">0.0143</td>
+        </tr>
+        <tr data-m="xy335-6-3-41">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.2092</td><td style="color:#aabbcc">0.3563</td><td style="color:#aabbcc">0.3209</td>
+        </tr>
+        <tr data-m="xy335-6-3-41">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8950</td><td style="color:#aabbcc">0.9468</td><td style="color:#aabbcc">0.9207</td>
+        </tr>
+        <tr data-m="xy335-6-3-41">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8953</td><td style="color:#aabbcc">0.9336</td><td style="color:#aabbcc">0.9535</td>
+        </tr>
+        <tr data-m="xy335-6-3-41">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8948</td><td style="color:#aabbcc">0.9604</td><td style="color:#aabbcc">0.8901</td>
+        </tr>
+        <tr data-m="xy335-6-4-34">
+          <td class="cs" rowspan="5">XY335-6-4-34</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0185</td><td style="color:#aabbcc">0.0069</td><td style="color:#aabbcc">0.0115</td>
+        </tr>
+        <tr data-m="xy335-6-4-34">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1528</td><td style="color:#aabbcc">0.2430</td><td style="color:#aabbcc">0.2057</td>
+        </tr>
+        <tr data-m="xy335-6-4-34">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9148</td><td style="color:#aabbcc">0.9495</td><td style="color:#aabbcc">0.9154</td>
+        </tr>
+        <tr data-m="xy335-6-4-34">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.9020</td><td style="color:#aabbcc">0.9523</td><td style="color:#aabbcc">0.9384</td>
+        </tr>
+        <tr data-m="xy335-6-4-34">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9279</td><td style="color:#aabbcc">0.9468</td><td style="color:#aabbcc">0.8936</td>
+        </tr>
+        <tr data-m="xy335-7-3-6">
+          <td class="cs" rowspan="5">XY335-7-3-6</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0153</td><td style="color:#aabbcc">0.0073</td><td style="color:#aabbcc">0.0094</td>
+        </tr>
+        <tr data-m="xy335-7-3-6">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1255</td><td style="color:#aabbcc">0.1143</td><td style="color:#aabbcc">0.1241</td>
+        </tr>
+        <tr data-m="xy335-7-3-6">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9030</td><td style="color:#aabbcc">0.9478</td><td style="color:#aabbcc">0.9306</td>
+        </tr>
+        <tr data-m="xy335-7-3-6">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8709</td><td style="color:#aabbcc">0.9449</td><td style="color:#aabbcc">0.9456</td>
+        </tr>
+        <tr data-m="xy335-7-3-6">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9375</td><td style="color:#aabbcc">0.9507</td><td style="color:#aabbcc">0.9160</td>
+        </tr>
+        <tr data-m="xy335-7-4-10">
+          <td class="cs" rowspan="5">XY335-7-4-10</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0133</td><td style="color:#aabbcc">0.0065</td><td style="color:#aabbcc">0.0094</td>
+        </tr>
+        <tr data-m="xy335-7-4-10">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.9612</td><td style="color:#aabbcc">0.1378</td><td style="color:#aabbcc">0.1548</td>
+        </tr>
+        <tr data-m="xy335-7-4-10">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9169</td><td style="color:#aabbcc">0.9657</td><td style="color:#aabbcc">0.9359</td>
+        </tr>
+        <tr data-m="xy335-7-4-10">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8928</td><td style="color:#aabbcc">0.9388</td><td style="color:#aabbcc">0.9600</td>
+        </tr>
+        <tr data-m="xy335-7-4-10">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9423</td><td style="color:#aabbcc">0.9941</td><td style="color:#aabbcc">0.9131</td>
+        </tr>
+        <tr data-m="xy335-7-4-17">
+          <td class="cs" rowspan="5">XY335-7-4-17</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0213</td><td style="color:#aabbcc">0.0070</td><td style="color:#aabbcc">0.0086</td>
+        </tr>
+        <tr data-m="xy335-7-4-17">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.0988</td><td style="color:#aabbcc">0.2658</td><td style="color:#aabbcc">0.3441</td>
+        </tr>
+        <tr data-m="xy335-7-4-17">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.9180</td><td style="color:#aabbcc">0.9396</td><td style="color:#aabbcc">0.9342</td>
+        </tr>
+        <tr data-m="xy335-7-4-17">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8942</td><td style="color:#aabbcc">0.9183</td><td style="color:#aabbcc">0.9515</td>
+        </tr>
+        <tr data-m="xy335-7-4-17">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9431</td><td style="color:#aabbcc">0.9619</td><td style="color:#aabbcc">0.9175</td>
+        </tr>
+        <tr data-m="xy335-8-3-1">
+          <td class="cs" rowspan="5">XY335-8-3-1</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0178</td><td style="color:#aabbcc">0.0078</td><td style="color:#aabbcc">0.0107</td>
+        </tr>
+        <tr data-m="xy335-8-3-1">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1593</td><td style="color:#aabbcc">0.4132</td><td style="color:#aabbcc">0.1404</td>
+        </tr>
+        <tr data-m="xy335-8-3-1">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8949</td><td style="color:#aabbcc">0.9503</td><td style="color:#aabbcc">0.8953</td>
+        </tr>
+        <tr data-m="xy335-8-3-1">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8481</td><td style="color:#aabbcc">0.9215</td><td style="color:#aabbcc">0.8947</td>
+        </tr>
+        <tr data-m="xy335-8-3-1">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9472</td><td style="color:#aabbcc">0.9810</td><td style="color:#aabbcc">0.8960</td>
+        </tr>
+        <tr data-m="xy335-8-3-3">
+          <td class="cs" rowspan="5">XY335-8-3-3</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0185</td><td style="color:#aabbcc">0.0144</td><td style="color:#aabbcc">0.0173</td>
+        </tr>
+        <tr data-m="xy335-8-3-3">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.3840</td><td style="color:#aabbcc">0.3736</td><td style="color:#aabbcc">0.4007</td>
+        </tr>
+        <tr data-m="xy335-8-3-3">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8420</td><td style="color:#aabbcc">0.8919</td><td style="color:#aabbcc">0.9100</td>
+        </tr>
+        <tr data-m="xy335-8-3-3">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8007</td><td style="color:#aabbcc">0.8809</td><td style="color:#aabbcc">0.9355</td>
+        </tr>
+        <tr data-m="xy335-8-3-3">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8878</td><td style="color:#aabbcc">0.9033</td><td style="color:#aabbcc">0.8857</td>
+        </tr>
+        <tr data-m="xy335-8-5-5">
+          <td class="cs" rowspan="5">XY335-8-5-5</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0185</td><td style="color:#aabbcc">0.0104</td><td style="color:#aabbcc">0.0116</td>
+        </tr>
+        <tr data-m="xy335-8-5-5">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1097</td><td style="color:#aabbcc">0.2320</td><td style="color:#aabbcc">0.2242</td>
+        </tr>
+        <tr data-m="xy335-8-5-5">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8759</td><td style="color:#aabbcc">0.8983</td><td style="color:#aabbcc">0.8889</td>
+        </tr>
+        <tr data-m="xy335-8-5-5">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8303</td><td style="color:#aabbcc">0.8895</td><td style="color:#aabbcc">0.9017</td>
+        </tr>
+        <tr data-m="xy335-8-5-5">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9269</td><td style="color:#aabbcc">0.9072</td><td style="color:#aabbcc">0.8765</td>
+        </tr>
+        <tr data-m="xy335-9-6-5">
+          <td class="cs" rowspan="5">XY335-9-6-5</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0281</td><td style="color:#aabbcc">0.0128</td><td style="color:#aabbcc">0.0168</td>
+        </tr>
+        <tr data-m="xy335-9-6-5">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">1.1930</td><td style="color:#aabbcc">0.4897</td><td style="color:#aabbcc">0.5280</td>
+        </tr>
+        <tr data-m="xy335-9-6-5">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8735</td><td style="color:#aabbcc">0.9071</td><td style="color:#aabbcc">0.9108</td>
+        </tr>
+        <tr data-m="xy335-9-6-5">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.8721</td><td style="color:#aabbcc">0.9056</td><td style="color:#aabbcc">0.9502</td>
+        </tr>
+        <tr data-m="xy335-9-6-5">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8750</td><td style="color:#aabbcc">0.9087</td><td style="color:#aabbcc">0.8745</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18">
+          <td class="cs" rowspan="5">benthi_control_A_D18</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0120</td><td style="color:#aabbcc">0.0061</td><td style="color:#aabbcc">0.0106</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1036</td><td style="color:#aabbcc">0.0847</td><td style="color:#aabbcc">0.1145</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5058</td><td style="color:#aabbcc">0.8885</td><td style="color:#aabbcc">0.6094</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3652</td><td style="color:#aabbcc">0.8156</td><td style="color:#aabbcc">0.4929</td>
+        </tr>
+        <tr data-m="benthi_control_a_d18">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8223</td><td style="color:#aabbcc">0.9756</td><td style="color:#aabbcc">0.7979</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30">
+          <td class="cs" rowspan="5">benthi_control_A_D30</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0162</td><td style="color:#aabbcc">0.0103</td><td style="color:#aabbcc">0.0143</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0975</td><td style="color:#aabbcc">0.1328</td><td style="color:#aabbcc">0.1466</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4007</td><td style="color:#aabbcc">0.7140</td><td style="color:#aabbcc">0.5993</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.2722</td><td style="color:#aabbcc">0.5959</td><td style="color:#aabbcc">0.5356</td>
+        </tr>
+        <tr data-m="benthi_control_a_d30">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.7588</td><td style="color:#aabbcc">0.8906</td><td style="color:#aabbcc">0.6802</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16">
+          <td class="cs" rowspan="5">benthi_control_C_D16</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0133</td><td style="color:#aabbcc">0.0067</td><td style="color:#aabbcc">0.0106</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1086</td><td style="color:#aabbcc">0.0988</td><td style="color:#aabbcc">0.2131</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5485</td><td style="color:#aabbcc">0.8989</td><td style="color:#aabbcc">0.7552</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4164</td><td style="color:#aabbcc">0.8973</td><td style="color:#aabbcc">0.9437</td>
+        </tr>
+        <tr data-m="benthi_control_c_d16">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8032</td><td style="color:#aabbcc">0.9004</td><td style="color:#aabbcc">0.6294</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22">
+          <td class="cs" rowspan="5">benthi_control_C_D22</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0129</td><td style="color:#aabbcc">0.0062</td><td style="color:#aabbcc">0.0108</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1127</td><td style="color:#aabbcc">0.0999</td><td style="color:#aabbcc">0.1931</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5406</td><td style="color:#aabbcc">0.8985</td><td style="color:#aabbcc">0.7581</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4069</td><td style="color:#aabbcc">0.8403</td><td style="color:#aabbcc">0.6841</td>
+        </tr>
+        <tr data-m="benthi_control_c_d22">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8052</td><td style="color:#aabbcc">0.9653</td><td style="color:#aabbcc">0.8501</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00">
+          <td class="cs" rowspan="5">benthi_heat_B_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0091</td><td style="color:#aabbcc">0.0038</td><td style="color:#aabbcc">0.0050</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0751</td><td style="color:#aabbcc">0.0345</td><td style="color:#aabbcc">0.1059</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5539</td><td style="color:#aabbcc">0.9537</td><td style="color:#aabbcc">0.9203</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3880</td><td style="color:#aabbcc">0.9266</td><td style="color:#aabbcc">0.8896</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9678</td><td style="color:#aabbcc">0.9824</td><td style="color:#aabbcc">0.9531</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04">
+          <td class="cs" rowspan="5">benthi_heat_B_D04</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0113</td><td style="color:#aabbcc">0.0053</td><td style="color:#aabbcc">0.0070</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0845</td><td style="color:#aabbcc">0.1044</td><td style="color:#aabbcc">0.0857</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5332</td><td style="color:#aabbcc">0.9246</td><td style="color:#aabbcc">0.8433</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3755</td><td style="color:#aabbcc">0.8751</td><td style="color:#aabbcc">0.8024</td>
+        </tr>
+        <tr data-m="benthi_heat_b_d04">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9194</td><td style="color:#aabbcc">0.9800</td><td style="color:#aabbcc">0.8887</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02">
+          <td class="cs" rowspan="5">benthi_shade_A_D02</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0161</td><td style="color:#aabbcc">0.0088</td><td style="color:#aabbcc">0.0113</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1064</td><td style="color:#aabbcc">0.1465</td><td style="color:#aabbcc">0.2502</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5317</td><td style="color:#aabbcc">0.8475</td><td style="color:#aabbcc">0.7891</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4135</td><td style="color:#aabbcc">0.8748</td><td style="color:#aabbcc">0.9164</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d02">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.7446</td><td style="color:#aabbcc">0.8218</td><td style="color:#aabbcc">0.6929</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22">
+          <td class="cs" rowspan="5">benthi_shade_A_D22</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0135</td><td style="color:#aabbcc">0.0065</td><td style="color:#aabbcc">0.0086</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1108</td><td style="color:#aabbcc">0.1239</td><td style="color:#aabbcc">0.2417</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4320</td><td style="color:#aabbcc">0.8680</td><td style="color:#aabbcc">0.7632</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.2970</td><td style="color:#aabbcc">0.8536</td><td style="color:#aabbcc">0.7380</td>
+        </tr>
+        <tr data-m="benthi_shade_a_d22">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.7920</td><td style="color:#aabbcc">0.8828</td><td style="color:#aabbcc">0.7900</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02">
+          <td class="cs" rowspan="5">benthi_shade_B_D02</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0108</td><td style="color:#aabbcc">0.0049</td><td style="color:#aabbcc">0.0069</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1432</td><td style="color:#aabbcc">0.2181</td><td style="color:#aabbcc">0.2139</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5790</td><td style="color:#aabbcc">0.9387</td><td style="color:#aabbcc">0.8156</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4370</td><td style="color:#aabbcc">0.9184</td><td style="color:#aabbcc">0.7395</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d02">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8579</td><td style="color:#aabbcc">0.9600</td><td style="color:#aabbcc">0.9092</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08">
+          <td class="cs" rowspan="5">benthi_shade_B_D08</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0105</td><td style="color:#aabbcc">0.0043</td><td style="color:#aabbcc">0.0055</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0927</td><td style="color:#aabbcc">0.0605</td><td style="color:#aabbcc">0.1079</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.4910</td><td style="color:#aabbcc">0.9199</td><td style="color:#aabbcc">0.8923</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3392</td><td style="color:#aabbcc">0.9075</td><td style="color:#aabbcc">0.9337</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d08">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8892</td><td style="color:#aabbcc">0.9326</td><td style="color:#aabbcc">0.8545</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14">
+          <td class="cs" rowspan="5">benthi_shade_B_D14</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0100</td><td style="color:#aabbcc">0.0041</td><td style="color:#aabbcc">0.0053</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1078</td><td style="color:#aabbcc">0.0552</td><td style="color:#aabbcc">0.0603</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5095</td><td style="color:#aabbcc">0.9596</td><td style="color:#aabbcc">0.8894</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3546</td><td style="color:#aabbcc">0.9382</td><td style="color:#aabbcc">0.8643</td>
+        </tr>
+        <tr data-m="benthi_shade_b_d14">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9048</td><td style="color:#aabbcc">0.9819</td><td style="color:#aabbcc">0.9160</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05">
+          <td class="cs" rowspan="5">m82D_control1_A_D05</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0075</td><td style="color:#aabbcc">0.0051</td><td style="color:#aabbcc">0.0096</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1131</td><td style="color:#aabbcc">0.0761</td><td style="color:#aabbcc">0.3228</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8335</td><td style="color:#aabbcc">0.9450</td><td style="color:#aabbcc">0.8608</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7371</td><td style="color:#aabbcc">0.9343</td><td style="color:#aabbcc">0.8461</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d05">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9590</td><td style="color:#aabbcc">0.9561</td><td style="color:#aabbcc">0.8760</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13">
+          <td class="cs" rowspan="5">m82D_control1_A_D13</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0095</td><td style="color:#aabbcc">0.0067</td><td style="color:#aabbcc">0.0120</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0958</td><td style="color:#aabbcc">0.0843</td><td style="color:#aabbcc">0.2715</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7880</td><td style="color:#aabbcc">0.9133</td><td style="color:#aabbcc">0.7834</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6891</td><td style="color:#aabbcc">0.8754</td><td style="color:#aabbcc">0.8533</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d13">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9199</td><td style="color:#aabbcc">0.9546</td><td style="color:#aabbcc">0.7241</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16">
+          <td class="cs" rowspan="5">m82D_control1_A_D16</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0093</td><td style="color:#aabbcc">0.0066</td><td style="color:#aabbcc">0.0117</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1056</td><td style="color:#aabbcc">0.0863</td><td style="color:#aabbcc">0.1414</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7857</td><td style="color:#aabbcc">0.9135</td><td style="color:#aabbcc">0.7627</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6638</td><td style="color:#aabbcc">0.8569</td><td style="color:#aabbcc">0.6660</td>
+        </tr>
+        <tr data-m="m82d_control1_a_d16">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9624</td><td style="color:#aabbcc">0.9780</td><td style="color:#aabbcc">0.8921</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03">
+          <td class="cs" rowspan="5">m82D_control1_B_D03</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0065</td><td style="color:#aabbcc">0.0043</td><td style="color:#aabbcc">0.0084</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0529</td><td style="color:#aabbcc">0.0451</td><td style="color:#aabbcc">0.1930</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8679</td><td style="color:#aabbcc">0.9793</td><td style="color:#aabbcc">0.8491</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7683</td><td style="color:#aabbcc">0.9626</td><td style="color:#aabbcc">0.7808</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d03">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9971</td><td style="color:#aabbcc">0.9966</td><td style="color:#aabbcc">0.9307</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13">
+          <td class="cs" rowspan="5">m82D_control1_B_D13</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0090</td><td style="color:#aabbcc">0.0063</td><td style="color:#aabbcc">0.0105</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1088</td><td style="color:#aabbcc">0.0557</td><td style="color:#aabbcc">0.1296</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7570</td><td style="color:#aabbcc">0.9062</td><td style="color:#aabbcc">0.7661</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6255</td><td style="color:#aabbcc">0.8559</td><td style="color:#aabbcc">0.7488</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d13">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9585</td><td style="color:#aabbcc">0.9629</td><td style="color:#aabbcc">0.7842</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16">
+          <td class="cs" rowspan="5">m82D_control1_B_D16</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0104</td><td style="color:#aabbcc">0.0080</td><td style="color:#aabbcc">0.0119</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0880</td><td style="color:#aabbcc">0.0636</td><td style="color:#aabbcc">0.1984</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6956</td><td style="color:#aabbcc">0.8233</td><td style="color:#aabbcc">0.6955</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5589</td><td style="color:#aabbcc">0.7466</td><td style="color:#aabbcc">0.7330</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d16">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9209</td><td style="color:#aabbcc">0.9175</td><td style="color:#aabbcc">0.6616</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18">
+          <td class="cs" rowspan="5">m82D_control1_B_D18</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0094</td><td style="color:#aabbcc">0.0079</td><td style="color:#aabbcc">0.0114</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0668</td><td style="color:#aabbcc">0.0739</td><td style="color:#aabbcc">0.1349</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6887</td><td style="color:#aabbcc">0.8054</td><td style="color:#aabbcc">0.6499</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5336</td><td style="color:#aabbcc">0.7008</td><td style="color:#aabbcc">0.5447</td>
+        </tr>
+        <tr data-m="m82d_control1_b_d18">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9712</td><td style="color:#aabbcc">0.9468</td><td style="color:#aabbcc">0.8057</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18">
+          <td class="cs" rowspan="5">m82D_control2_A_D18</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0099</td><td style="color:#aabbcc">0.0074</td><td style="color:#aabbcc">0.0119</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0739</td><td style="color:#aabbcc">0.0771</td><td style="color:#aabbcc">0.2536</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7325</td><td style="color:#aabbcc">0.8541</td><td style="color:#aabbcc">0.7228</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5938</td><td style="color:#aabbcc">0.7979</td><td style="color:#aabbcc">0.7191</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d18">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9556</td><td style="color:#aabbcc">0.9189</td><td style="color:#aabbcc">0.7266</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20">
+          <td class="cs" rowspan="5">m82D_control2_A_D20</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0095</td><td style="color:#aabbcc">0.0074</td><td style="color:#aabbcc">0.0107</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1338</td><td style="color:#aabbcc">0.0960</td><td style="color:#aabbcc">0.1135</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7619</td><td style="color:#aabbcc">0.8661</td><td style="color:#aabbcc">0.7983</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6401</td><td style="color:#aabbcc">0.8351</td><td style="color:#aabbcc">0.8021</td>
+        </tr>
+        <tr data-m="m82d_control2_a_d20">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9409</td><td style="color:#aabbcc">0.8994</td><td style="color:#aabbcc">0.7944</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02">
+          <td class="cs" rowspan="5">m82D_control2_C_D02</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0067</td><td style="color:#aabbcc">0.0045</td><td style="color:#aabbcc">0.0076</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0514</td><td style="color:#aabbcc">0.0339</td><td style="color:#aabbcc">0.2879</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8141</td><td style="color:#aabbcc">0.9455</td><td style="color:#aabbcc">0.8611</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6980</td><td style="color:#aabbcc">0.9324</td><td style="color:#aabbcc">0.9242</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d02">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9766</td><td style="color:#aabbcc">0.9590</td><td style="color:#aabbcc">0.8062</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08">
+          <td class="cs" rowspan="5">m82D_control2_C_D08</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0082</td><td style="color:#aabbcc">0.0074</td><td style="color:#aabbcc">0.0096</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0838</td><td style="color:#aabbcc">0.0528</td><td style="color:#aabbcc">0.1977</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8405</td><td style="color:#aabbcc">0.8992</td><td style="color:#aabbcc">0.8222</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7369</td><td style="color:#aabbcc">0.9125</td><td style="color:#aabbcc">0.8347</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d08">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9780</td><td style="color:#aabbcc">0.8862</td><td style="color:#aabbcc">0.8101</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12">
+          <td class="cs" rowspan="5">m82D_control2_C_D12</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0094</td><td style="color:#aabbcc">0.0064</td><td style="color:#aabbcc">0.0109</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1247</td><td style="color:#aabbcc">0.1209</td><td style="color:#aabbcc">0.1375</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7425</td><td style="color:#aabbcc">0.8797</td><td style="color:#aabbcc">0.7414</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6174</td><td style="color:#aabbcc">0.8320</td><td style="color:#aabbcc">0.7213</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d12">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9312</td><td style="color:#aabbcc">0.9331</td><td style="color:#aabbcc">0.7627</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14">
+          <td class="cs" rowspan="5">m82D_control2_C_D14</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0088</td><td style="color:#aabbcc">0.0065</td><td style="color:#aabbcc">0.0101</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0849</td><td style="color:#aabbcc">0.1044</td><td style="color:#aabbcc">0.2207</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7628</td><td style="color:#aabbcc">0.8951</td><td style="color:#aabbcc">0.7520</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6252</td><td style="color:#aabbcc">0.8261</td><td style="color:#aabbcc">0.6587</td>
+        </tr>
+        <tr data-m="m82d_control2_c_d14">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9780</td><td style="color:#aabbcc">0.9766</td><td style="color:#aabbcc">0.8760</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26">
+          <td class="cs" rowspan="5">m82D_drought_A_D26</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0098</td><td style="color:#aabbcc">0.0069</td><td style="color:#aabbcc">0.0106</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0699</td><td style="color:#aabbcc">0.1129</td><td style="color:#aabbcc">0.1810</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7321</td><td style="color:#aabbcc">0.8688</td><td style="color:#aabbcc">0.7373</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5951</td><td style="color:#aabbcc">0.8041</td><td style="color:#aabbcc">0.7662</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d26">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9512</td><td style="color:#aabbcc">0.9448</td><td style="color:#aabbcc">0.7104</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30">
+          <td class="cs" rowspan="5">m82D_drought_A_D30</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0090</td><td style="color:#aabbcc">0.0062</td><td style="color:#aabbcc">0.0088</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0800</td><td style="color:#aabbcc">0.1021</td><td style="color:#aabbcc">0.1351</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7200</td><td style="color:#aabbcc">0.9006</td><td style="color:#aabbcc">0.8112</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5793</td><td style="color:#aabbcc">0.8433</td><td style="color:#aabbcc">0.7682</td>
+        </tr>
+        <tr data-m="m82d_drought_a_d30">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9507</td><td style="color:#aabbcc">0.9663</td><td style="color:#aabbcc">0.8594</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04">
+          <td class="cs" rowspan="5">m82D_drought_B_D04</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0080</td><td style="color:#aabbcc">0.0056</td><td style="color:#aabbcc">0.0108</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0947</td><td style="color:#aabbcc">0.0573</td><td style="color:#aabbcc">0.2591</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8397</td><td style="color:#aabbcc">0.9484</td><td style="color:#aabbcc">0.8473</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7707</td><td style="color:#aabbcc">0.9400</td><td style="color:#aabbcc">0.9318</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d04">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9224</td><td style="color:#aabbcc">0.9570</td><td style="color:#aabbcc">0.7769</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06">
+          <td class="cs" rowspan="5">m82D_drought_B_D06</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0074</td><td style="color:#aabbcc">0.0050</td><td style="color:#aabbcc">0.0084</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0916</td><td style="color:#aabbcc">0.0605</td><td style="color:#aabbcc">0.2070</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8254</td><td style="color:#aabbcc">0.9555</td><td style="color:#aabbcc">0.8556</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7201</td><td style="color:#aabbcc">0.9353</td><td style="color:#aabbcc">0.8138</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d06">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9668</td><td style="color:#aabbcc">0.9766</td><td style="color:#aabbcc">0.9019</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14">
+          <td class="cs" rowspan="5">m82D_drought_B_D14</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0094</td><td style="color:#aabbcc">0.0060</td><td style="color:#aabbcc">0.0129</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1317</td><td style="color:#aabbcc">0.0737</td><td style="color:#aabbcc">0.1643</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7304</td><td style="color:#aabbcc">0.9043</td><td style="color:#aabbcc">0.6726</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5978</td><td style="color:#aabbcc">0.8746</td><td style="color:#aabbcc">0.6287</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d14">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9385</td><td style="color:#aabbcc">0.9360</td><td style="color:#aabbcc">0.7231</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16">
+          <td class="cs" rowspan="5">m82D_drought_B_D16</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0096</td><td style="color:#aabbcc">0.0076</td><td style="color:#aabbcc">0.0146</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0528</td><td style="color:#aabbcc">0.1096</td><td style="color:#aabbcc">0.1960</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7708</td><td style="color:#aabbcc">0.8953</td><td style="color:#aabbcc">0.6789</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6548</td><td style="color:#aabbcc">0.8618</td><td style="color:#aabbcc">0.6320</td>
+        </tr>
+        <tr data-m="m82d_drought_b_d16">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9365</td><td style="color:#aabbcc">0.9316</td><td style="color:#aabbcc">0.7334</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08">
+          <td class="cs" rowspan="5">m82D_drought_C_D08</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0075</td><td style="color:#aabbcc">0.0051</td><td style="color:#aabbcc">0.0097</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1295</td><td style="color:#aabbcc">0.0883</td><td style="color:#aabbcc">0.4065</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8520</td><td style="color:#aabbcc">0.9593</td><td style="color:#aabbcc">0.8289</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7580</td><td style="color:#aabbcc">0.9399</td><td style="color:#aabbcc">0.9277</td>
+        </tr>
+        <tr data-m="m82d_drought_c_d08">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9727</td><td style="color:#aabbcc">0.9795</td><td style="color:#aabbcc">0.7490</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08">
+          <td class="cs" rowspan="5">m82D_heat_B_D08</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0066</td><td style="color:#aabbcc">0.0052</td><td style="color:#aabbcc">0.0074</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0503</td><td style="color:#aabbcc">0.0643</td><td style="color:#aabbcc">0.2115</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8306</td><td style="color:#aabbcc">0.9316</td><td style="color:#aabbcc">0.8235</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7568</td><td style="color:#aabbcc">0.9519</td><td style="color:#aabbcc">0.8448</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d08">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9204</td><td style="color:#aabbcc">0.9121</td><td style="color:#aabbcc">0.8032</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15">
+          <td class="cs" rowspan="5">m82D_heat_B_D15</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0072</td><td style="color:#aabbcc">0.0044</td><td style="color:#aabbcc">0.0076</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0683</td><td style="color:#aabbcc">0.0278</td><td style="color:#aabbcc">0.2745</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7617</td><td style="color:#aabbcc">0.9323</td><td style="color:#aabbcc">0.8148</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6367</td><td style="color:#aabbcc">0.8899</td><td style="color:#aabbcc">0.8423</td>
+        </tr>
+        <tr data-m="m82d_heat_b_d15">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9478</td><td style="color:#aabbcc">0.9790</td><td style="color:#aabbcc">0.7891</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00">
+          <td class="cs" rowspan="5">m82D_heat_C_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0063</td><td style="color:#aabbcc">0.0055</td><td style="color:#aabbcc">0.0069</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0664</td><td style="color:#aabbcc">0.0481</td><td style="color:#aabbcc">0.1614</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8855</td><td style="color:#aabbcc">0.9295</td><td style="color:#aabbcc">0.8768</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7986</td><td style="color:#aabbcc">0.9246</td><td style="color:#aabbcc">0.9026</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9937</td><td style="color:#aabbcc">0.9346</td><td style="color:#aabbcc">0.8525</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03">
+          <td class="cs" rowspan="5">m82D_heat_C_D03</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0078</td><td style="color:#aabbcc">0.0058</td><td style="color:#aabbcc">0.0100</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0814</td><td style="color:#aabbcc">0.0560</td><td style="color:#aabbcc">0.3594</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8357</td><td style="color:#aabbcc">0.9332</td><td style="color:#aabbcc">0.8027</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7456</td><td style="color:#aabbcc">0.9515</td><td style="color:#aabbcc">0.7780</td>
+        </tr>
+        <tr data-m="m82d_heat_c_d03">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9507</td><td style="color:#aabbcc">0.9155</td><td style="color:#aabbcc">0.8291</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10">
+          <td class="cs" rowspan="5">m82D_highlight_A_D10</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0109</td><td style="color:#aabbcc">0.0095</td><td style="color:#aabbcc">0.0135</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1460</td><td style="color:#aabbcc">0.1460</td><td style="color:#aabbcc">0.1915</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7371</td><td style="color:#aabbcc">0.8497</td><td style="color:#aabbcc">0.7309</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6285</td><td style="color:#aabbcc">0.8558</td><td style="color:#aabbcc">0.7521</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d10">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8911</td><td style="color:#aabbcc">0.8438</td><td style="color:#aabbcc">0.7109</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16">
+          <td class="cs" rowspan="5">m82D_highlight_A_D16</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0101</td><td style="color:#aabbcc">0.0083</td><td style="color:#aabbcc">0.0102</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1630</td><td style="color:#aabbcc">0.1347</td><td style="color:#aabbcc">0.2004</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7364</td><td style="color:#aabbcc">0.8302</td><td style="color:#aabbcc">0.8034</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6376</td><td style="color:#aabbcc">0.7980</td><td style="color:#aabbcc">0.9114</td>
+        </tr>
+        <tr data-m="m82d_highlight_a_d16">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8716</td><td style="color:#aabbcc">0.8652</td><td style="color:#aabbcc">0.7183</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10">
+          <td class="cs" rowspan="5">m82D_highlight_B_D10</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0104</td><td style="color:#aabbcc">0.0078</td><td style="color:#aabbcc">0.0121</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1223</td><td style="color:#aabbcc">0.0776</td><td style="color:#aabbcc">0.1319</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7096</td><td style="color:#aabbcc">0.8066</td><td style="color:#aabbcc">0.6718</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6176</td><td style="color:#aabbcc">0.7929</td><td style="color:#aabbcc">0.7391</td>
+        </tr>
+        <tr data-m="m82d_highlight_b_d10">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8340</td><td style="color:#aabbcc">0.8208</td><td style="color:#aabbcc">0.6157</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00">
+          <td class="cs" rowspan="5">m82D_highlight_C_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0069</td><td style="color:#aabbcc">0.0047</td><td style="color:#aabbcc">0.0104</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1041</td><td style="color:#aabbcc">0.0466</td><td style="color:#aabbcc">0.3318</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8150</td><td style="color:#aabbcc">0.9604</td><td style="color:#aabbcc">0.7222</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.7137</td><td style="color:#aabbcc">0.9345</td><td style="color:#aabbcc">0.8088</td>
+        </tr>
+        <tr data-m="m82d_highlight_c_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9497</td><td style="color:#aabbcc">0.9878</td><td style="color:#aabbcc">0.6523</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24">
+          <td class="cs" rowspan="5">m82D_shade_A_D24</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0056</td><td style="color:#aabbcc">0.0031</td><td style="color:#aabbcc">0.0049</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0703</td><td style="color:#aabbcc">0.0443</td><td style="color:#aabbcc">0.1507</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7822</td><td style="color:#aabbcc">0.9494</td><td style="color:#aabbcc">0.8773</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6472</td><td style="color:#aabbcc">0.9232</td><td style="color:#aabbcc">0.8156</td>
+        </tr>
+        <tr data-m="m82d_shade_a_d24">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9883</td><td style="color:#aabbcc">0.9771</td><td style="color:#aabbcc">0.9492</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13">
+          <td class="cs" rowspan="5">m82D_shade_B_D13</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0064</td><td style="color:#aabbcc">0.0038</td><td style="color:#aabbcc">0.0061</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0930</td><td style="color:#aabbcc">0.0539</td><td style="color:#aabbcc">0.1303</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.8005</td><td style="color:#aabbcc">0.9569</td><td style="color:#aabbcc">0.8707</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6862</td><td style="color:#aabbcc">0.9309</td><td style="color:#aabbcc">0.8967</td>
+        </tr>
+        <tr data-m="m82d_shade_b_d13">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9604</td><td style="color:#aabbcc">0.9844</td><td style="color:#aabbcc">0.8462</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18">
+          <td class="cs" rowspan="5">m82D_shade_C_D18</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0069</td><td style="color:#aabbcc">0.0045</td><td style="color:#aabbcc">0.0077</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0562</td><td style="color:#aabbcc">0.0329</td><td style="color:#aabbcc">0.1696</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7600</td><td style="color:#aabbcc">0.9532</td><td style="color:#aabbcc">0.8132</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6166</td><td style="color:#aabbcc">0.9139</td><td style="color:#aabbcc">0.7109</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d18">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9902</td><td style="color:#aabbcc">0.9961</td><td style="color:#aabbcc">0.9497</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21">
+          <td class="cs" rowspan="5">m82D_shade_C_D21</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0064</td><td style="color:#aabbcc">0.0043</td><td style="color:#aabbcc">0.0052</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0668</td><td style="color:#aabbcc">0.0297</td><td style="color:#aabbcc">0.1718</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7650</td><td style="color:#aabbcc">0.9212</td><td style="color:#aabbcc">0.8816</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6353</td><td style="color:#aabbcc">0.9091</td><td style="color:#aabbcc">0.9320</td>
+        </tr>
+        <tr data-m="m82d_shade_c_d21">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9614</td><td style="color:#aabbcc">0.9336</td><td style="color:#aabbcc">0.8364</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00">
+          <td class="cs" rowspan="5">sorghum_control_A_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0073</td><td style="color:#aabbcc">0.0054</td><td style="color:#aabbcc">0.0070</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0521</td><td style="color:#aabbcc">0.1288</td><td style="color:#aabbcc">0.1711</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6816</td><td style="color:#aabbcc">0.8793</td><td style="color:#aabbcc">0.8034</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5438</td><td style="color:#aabbcc">0.8906</td><td style="color:#aabbcc">0.8381</td>
+        </tr>
+        <tr data-m="sorghum_control_a_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9131</td><td style="color:#aabbcc">0.8682</td><td style="color:#aabbcc">0.7715</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00">
+          <td class="cs" rowspan="5">sorghum_control_B_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0080</td><td style="color:#aabbcc">0.0098</td><td style="color:#aabbcc">0.0079</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0513</td><td style="color:#aabbcc">0.1461</td><td style="color:#aabbcc">0.0437</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7130</td><td style="color:#aabbcc">0.7210</td><td style="color:#aabbcc">0.7637</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6468</td><td style="color:#aabbcc">0.7610</td><td style="color:#aabbcc">0.9420</td>
+        </tr>
+        <tr data-m="sorghum_control_b_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.7944</td><td style="color:#aabbcc">0.6851</td><td style="color:#aabbcc">0.6421</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16">
+          <td class="cs" rowspan="5">sorghum_control_C_D16</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0084</td><td style="color:#aabbcc">0.0048</td><td style="color:#aabbcc">0.0061</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0932</td><td style="color:#aabbcc">0.1257</td><td style="color:#aabbcc">0.2594</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7088</td><td style="color:#aabbcc">0.9606</td><td style="color:#aabbcc">0.9349</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5506</td><td style="color:#aabbcc">0.9315</td><td style="color:#aabbcc">0.8945</td>
+        </tr>
+        <tr data-m="sorghum_control_c_d16">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9946</td><td style="color:#aabbcc">0.9917</td><td style="color:#aabbcc">0.9790</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02">
+          <td class="cs" rowspan="5">sorghum_heat_A_D02</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0073</td><td style="color:#aabbcc">0.0086</td><td style="color:#aabbcc">0.0055</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0616</td><td style="color:#aabbcc">0.0897</td><td style="color:#aabbcc">0.2864</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7378</td><td style="color:#aabbcc">0.8825</td><td style="color:#aabbcc">0.9534</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5859</td><td style="color:#aabbcc">0.7991</td><td style="color:#aabbcc">0.9581</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d02">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9961</td><td style="color:#aabbcc">0.9854</td><td style="color:#aabbcc">0.9487</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12">
+          <td class="cs" rowspan="5">sorghum_heat_A_D12</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0097</td><td style="color:#aabbcc">0.0111</td><td style="color:#aabbcc">0.0055</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0709</td><td style="color:#aabbcc">0.2632</td><td style="color:#aabbcc">0.2077</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5245</td><td style="color:#aabbcc">0.8942</td><td style="color:#aabbcc">0.9346</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3617</td><td style="color:#aabbcc">0.8148</td><td style="color:#aabbcc">0.9222</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d12">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9536</td><td style="color:#aabbcc">0.9907</td><td style="color:#aabbcc">0.9473</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22">
+          <td class="cs" rowspan="5">sorghum_heat_A_D22</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0093</td><td style="color:#aabbcc">0.0055</td><td style="color:#aabbcc">0.0052</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1309</td><td style="color:#aabbcc">0.0544</td><td style="color:#aabbcc">0.2264</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6750</td><td style="color:#aabbcc">0.9106</td><td style="color:#aabbcc">0.9448</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5251</td><td style="color:#aabbcc">0.8759</td><td style="color:#aabbcc">0.9619</td>
+        </tr>
+        <tr data-m="sorghum_heat_a_d22">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9443</td><td style="color:#aabbcc">0.9482</td><td style="color:#aabbcc">0.9282</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18">
+          <td class="cs" rowspan="5">sorghum_heat_C_D18</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0094</td><td style="color:#aabbcc">0.0056</td><td style="color:#aabbcc">0.0056</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0903</td><td style="color:#aabbcc">0.1272</td><td style="color:#aabbcc">0.2081</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6360</td><td style="color:#aabbcc">0.9113</td><td style="color:#aabbcc">0.9297</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4665</td><td style="color:#aabbcc">0.8505</td><td style="color:#aabbcc">0.9496</td>
+        </tr>
+        <tr data-m="sorghum_heat_c_d18">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9990</td><td style="color:#aabbcc">0.9814</td><td style="color:#aabbcc">0.9106</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08">
+          <td class="cs" rowspan="5">sorghum_highlight_A_D08</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0084</td><td style="color:#aabbcc">0.0051</td><td style="color:#aabbcc">0.0062</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1217</td><td style="color:#aabbcc">0.2901</td><td style="color:#aabbcc">0.1496</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7055</td><td style="color:#aabbcc">0.9519</td><td style="color:#aabbcc">0.8760</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.5547</td><td style="color:#aabbcc">0.9219</td><td style="color:#aabbcc">0.8495</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d08">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9688</td><td style="color:#aabbcc">0.9839</td><td style="color:#aabbcc">0.9043</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14">
+          <td class="cs" rowspan="5">sorghum_highlight_A_D14</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0112</td><td style="color:#aabbcc">0.0062</td><td style="color:#aabbcc">0.0076</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1092</td><td style="color:#aabbcc">0.1067</td><td style="color:#aabbcc">0.1126</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6024</td><td style="color:#aabbcc">0.8870</td><td style="color:#aabbcc">0.8548</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4485</td><td style="color:#aabbcc">0.8497</td><td style="color:#aabbcc">0.8843</td>
+        </tr>
+        <tr data-m="sorghum_highlight_a_d14">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9170</td><td style="color:#aabbcc">0.9277</td><td style="color:#aabbcc">0.8271</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00">
+          <td class="cs" rowspan="5">sorghum_highlight_B_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0066</td><td style="color:#aabbcc">0.0047</td><td style="color:#aabbcc">0.0060</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0547</td><td style="color:#aabbcc">0.0506</td><td style="color:#aabbcc">0.1034</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7494</td><td style="color:#aabbcc">0.8894</td><td style="color:#aabbcc">0.8710</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6091</td><td style="color:#aabbcc">0.8705</td><td style="color:#aabbcc">0.9302</td>
+        </tr>
+        <tr data-m="sorghum_highlight_b_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9736</td><td style="color:#aabbcc">0.9092</td><td style="color:#aabbcc">0.8188</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02">
+          <td class="cs" rowspan="5">sorghum_highlight_C_D02</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0092</td><td style="color:#aabbcc">0.0049</td><td style="color:#aabbcc">0.0059</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0826</td><td style="color:#aabbcc">0.0632</td><td style="color:#aabbcc">0.1716</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5134</td><td style="color:#aabbcc">0.8942</td><td style="color:#aabbcc">0.8398</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.3463</td><td style="color:#aabbcc">0.8281</td><td style="color:#aabbcc">0.7831</td>
+        </tr>
+        <tr data-m="sorghum_highlight_c_d02">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9927</td><td style="color:#aabbcc">0.9717</td><td style="color:#aabbcc">0.9053</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22">
+          <td class="cs" rowspan="5">sorghum_shade_A_D22</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0101</td><td style="color:#aabbcc">0.0143</td><td style="color:#aabbcc">0.0044</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1398</td><td style="color:#aabbcc">0.1691</td><td style="color:#aabbcc">0.0627</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.5836</td><td style="color:#aabbcc">0.8264</td><td style="color:#aabbcc">0.9666</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4121</td><td style="color:#aabbcc">0.7061</td><td style="color:#aabbcc">0.9708</td>
+        </tr>
+        <tr data-m="sorghum_shade_a_d22">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9995</td><td style="color:#aabbcc">0.9961</td><td style="color:#aabbcc">0.9624</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00">
+          <td class="cs" rowspan="5">sorghum_shade_B_D00</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0076</td><td style="color:#aabbcc">0.0080</td><td style="color:#aabbcc">0.0082</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.0549</td><td style="color:#aabbcc">0.1449</td><td style="color:#aabbcc">0.0431</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.7208</td><td style="color:#aabbcc">0.7974</td><td style="color:#aabbcc">0.7266</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.6358</td><td style="color:#aabbcc">0.8035</td><td style="color:#aabbcc">0.7798</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d00">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.8320</td><td style="color:#aabbcc">0.7915</td><td style="color:#aabbcc">0.6802</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12">
+          <td class="cs" rowspan="5">sorghum_shade_B_D12</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0088</td><td style="color:#aabbcc">0.0047</td><td style="color:#aabbcc">0.0047</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1231</td><td style="color:#aabbcc">0.1051</td><td style="color:#aabbcc">0.2156</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6420</td><td style="color:#aabbcc">0.9191</td><td style="color:#aabbcc">0.9525</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4747</td><td style="color:#aabbcc">0.8518</td><td style="color:#aabbcc">0.9648</td>
+        </tr>
+        <tr data-m="sorghum_shade_b_d12">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9917</td><td style="color:#aabbcc">0.9980</td><td style="color:#aabbcc">0.9404</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22">
+          <td class="cs" rowspan="5">sorghum_shade_C_D22</td>
+          <td class="cm">Chamfer_Distance</td>
+          <td style="color:#aabbcc">0.0093</td><td style="color:#aabbcc">0.0073</td><td style="color:#aabbcc">0.0064</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22">
+          
+          <td class="cm">Hausdorff_Distance</td>
+          <td style="color:#aabbcc">0.1072</td><td style="color:#aabbcc">0.1762</td><td style="color:#aabbcc">0.3293</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22">
+          
+          <td class="cm">F_Score</td>
+          <td style="color:#aabbcc">0.6067</td><td style="color:#aabbcc">0.8594</td><td style="color:#aabbcc">0.9183</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22">
+          
+          <td class="cm">Precision</td>
+          <td style="color:#aabbcc">0.4386</td><td style="color:#aabbcc">0.7685</td><td style="color:#aabbcc">0.9385</td>
+        </tr>
+        <tr data-m="sorghum_shade_c_d22">
+          
+          <td class="cm">Recall</td>
+          <td style="color:#aabbcc">0.9839</td><td style="color:#aabbcc">0.9746</td><td style="color:#aabbcc">0.8989</td>
+        </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function mostrar(s){
+  document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
+  document.getElementById('sec-'+s).classList.add('active');
+  document.getElementById('btn-glob').className='sbtn '+(s==='glob'?'on':'off');
+  document.getElementById('btn-mues').className='sbtn '+(s==='mues'?'on':'off');
+}
+function filtrar(){
+  const q=document.getElementById('buscar').value.toLowerCase();
+  const rows=document.querySelectorAll('#tmuestras tbody tr');
+  const vis=new Set();
+  rows.forEach(r=>{if((r.dataset.m||'').includes(q))vis.add(r.dataset.m)});
+  let c=0;
+  rows.forEach(r=>{
+    const show=vis.has(r.dataset.m||'');
+    r.style.display=show?'':'none';
+    if(show&&r.querySelector('td.cs'))c++;
+  });
+  document.getElementById('cnt').textContent=c+' muestras';
+}
+</script>
+</body>
+</html>
